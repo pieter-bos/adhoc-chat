@@ -2,6 +2,6 @@ package transport;
 
 public interface PacketListener {
 
-    public void onPacketReceived(Object packet);
+    public void onPacketReceived(RawPacket packet);
 
 }

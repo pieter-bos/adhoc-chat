@@ -86,7 +86,7 @@ public class RawPacket {
         try {
             result =  new RawPacket(packet);
         } catch (InvalidPacketException e) { }
-        
+
         return result;
     }
 }
