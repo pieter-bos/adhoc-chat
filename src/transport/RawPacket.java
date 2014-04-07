@@ -2,6 +2,7 @@ package transport;
 
 import exceptions.InvalidPacketException;
 
+import java.net.Inet4Address;
 import java.nio.ByteBuffer;
 import java.util.Arrays;
 
@@ -42,6 +43,42 @@ public class RawPacket {
             }
 
             data = bb.slice().array();
+        }
+    }
+
+    public RawPacket(byte flags, int sequenceNumber, int acknowledgmentNumber,
+                     Inet4Address sourceAddress, Inet4Address destinationAddress) throws InvalidPacketException {
+        this(flags, sequenceNumber, acknowledgmentNumber,
+                sourceAddress.getAddress(), destinationAddress.getAddress(), null);
+    }
+
+    public RawPacket(byte flags, int sequenceNumber, int acknowledgmentNumber,
+                     Inet4Address sourceAddress, Inet4Address destinationAddress,
+                     byte[] data) throws InvalidPacketException {
+        this(flags, sequenceNumber, acknowledgmentNumber,
+                sourceAddress.getAddress(), destinationAddress.getAddress(), data);
+    }
+
+    public RawPacket(byte flags, int sequenceNumber, int acknowledgmentNumber,
+                     byte[] sourceAddress, byte[] destinationAddress) throws InvalidPacketException {
+        this(flags, sequenceNumber, acknowledgmentNumber, sourceAddress, destinationAddress, null);
+    }
+
+    public RawPacket(byte flags, int sequenceNumber, int acknowledgmentNumber,
+                     byte[] sourceAddress, byte[] destinationAddress, byte[] data) throws InvalidPacketException {
+        if (flags < 0) {
+            throw new InvalidPacketException(":(");
+        } else if (sourceAddress.length != 4 || destinationAddress.length != 4) {
+            throw new InvalidPacketException("Source and destination address need to be 4 bytes.");
+        } else {
+            this.flags = flags;
+            this.sequenceNumber = sequenceNumber;
+            this.acknowledgmentNumber = acknowledgmentNumber;
+            this.sourceAddress = sourceAddress.clone();
+            this.destinationAddress = destinationAddress.clone();
+            if (data != null) {
+                this.data = data.clone();
+            }
         }
     }
 
