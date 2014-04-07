@@ -6,19 +6,24 @@ import java.net.MulticastSocket;
 
 public class SocketImpl implements Socket {
     private static final String GROUP = "224.224.224.224";
-    private MulticastSocket mulSock;
+    private MulticastSocket mulSocket;
     private boolean connected = false;
 
     public SocketImpl(int port) throws IOException {
-        mulSock = new MulticastSocket(port);
-        mulSock.joinGroup(InetAddress.getByName(GROUP));
+        mulSocket = new MulticastSocket(port);
+        mulSocket.joinGroup(InetAddress.getByName(GROUP));
     }
 
     @Override
     public void connect() {
-        // TODO connect
+        syn();
 
         connected = true;
+    }
+
+    private void syn() {
+        // TODO implement this thing
+
     }
 
     @Override
