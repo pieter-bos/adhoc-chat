@@ -1,10 +1,12 @@
 package client;
 
+import java.net.InetSocketAddress;
+
 /**
  * Entry point for the chat application
  */
 public class Main {
-    public void Main(String[] args) {
+    public static void main(String[] args) {
 
     }
 }
