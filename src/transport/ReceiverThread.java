@@ -34,12 +34,13 @@ public class ReceiverThread extends Thread {
                 DatagramPacket datagramPacket = new DatagramPacket(buf, buf.length);
                 mulSocket.receive(datagramPacket);
 
-                // TODO Parse datagramPacket
+                RawPacket rawPacket = RawPacket.tryParse(datagramPacket.getData());
 
-
-                synchronized (packetListeners) {
-                    for (PacketListener listener : packetListeners) {
-
+                if (rawPacket != null) {
+                    synchronized (packetListeners) {
+                        for (PacketListener listener : packetListeners) {
+                            listener.onPacketReceived(rawPacket);
+                        }
                     }
                 }
             }
