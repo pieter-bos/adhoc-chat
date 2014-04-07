@@ -78,6 +78,8 @@ public class RawPacket {
             this.destinationAddress = destinationAddress.clone();
             if (data != null) {
                 this.data = data.clone();
+            } else {
+                this.data = new byte[] {};
             }
         }
     }
