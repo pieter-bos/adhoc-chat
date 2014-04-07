@@ -1,7 +1,13 @@
 package transport;
 
-/**
- * Created by Student on 7-4-2014.
- */
 public class RawPacket {
+    private byte flags;
+    private int sequenceNumber;
+    private int acknowledgmentNumber;
+    private byte[] data;
+
+    public RawPacket(byte[] packet) {
+
+    }
+
 }
