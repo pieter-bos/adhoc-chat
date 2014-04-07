@@ -10,4 +10,5 @@ public interface Socket {
     public void send(byte[] data, InetAddress destination);
     public void broadcast(byte[] data);
     public Packet receive();
+    public Iterable<InetAddress> getOtherClients();
 }
