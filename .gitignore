@@ -8,8 +8,8 @@
 *.ear
 
 # IDEA files
-.idea/
-*.iml
+*/.idea/workspace.xml
+*/.idea/tasks.xml
 
 # tex files
 *.aux
