@@ -7,6 +7,7 @@ import java.net.MulticastSocket;
 public class SocketImpl implements Socket {
     private static final String GROUP = "224.224.224.224";
     private MulticastSocket mulSock;
+    private boolean connected = false;
 
     public SocketImpl(int port) throws IOException {
         mulSock = new MulticastSocket(port);
@@ -15,12 +16,14 @@ public class SocketImpl implements Socket {
 
     @Override
     public void connect() {
+        // TODO connect
 
+        connected = true;
     }
 
     @Override
     public boolean isConnected() {
-        return false;
+        return connected;
     }
 
     @Override
