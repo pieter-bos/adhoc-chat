@@ -81,4 +81,12 @@ public class RawPacket {
         return data;
     }
 
+    public static RawPacket tryParse(byte[] packet) {
+        RawPacket result = null;
+        try {
+            result =  new RawPacket(packet);
+        } catch (InvalidPacketException e) { }
+        
+        return result;
+    }
 }
