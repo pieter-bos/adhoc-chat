@@ -2,7 +2,9 @@ package transport;
 
 import exceptions.InvalidPacketException;
 
-import java.net.Inet4Address;
+import java.net.InetAddress;
+import java.net.InetAddress;
+import java.net.UnknownHostException;
 import java.nio.ByteBuffer;
 
 public class RawPacket {
@@ -48,13 +50,13 @@ public class RawPacket {
     }
 
     public RawPacket(byte flags, int sequenceNumber, int acknowledgmentNumber, int retransmissionNumber,
-                     Inet4Address sourceAddress, Inet4Address destinationAddress) throws InvalidPacketException {
+                     InetAddress sourceAddress, InetAddress destinationAddress) throws InvalidPacketException {
         this(flags, sequenceNumber, acknowledgmentNumber, retransmissionNumber,
                 sourceAddress.getAddress(), destinationAddress.getAddress(), null);
     }
 
     public RawPacket(byte flags, int sequenceNumber, int acknowledgmentNumber, int retransmissionNumber,
-                     Inet4Address sourceAddress, Inet4Address destinationAddress,
+                     InetAddress sourceAddress, InetAddress destinationAddress,
                      byte[] data) throws InvalidPacketException {
         this(flags, sequenceNumber, acknowledgmentNumber, retransmissionNumber,
                 sourceAddress.getAddress(), destinationAddress.getAddress(), data);
@@ -114,8 +116,24 @@ public class RawPacket {
         return sourceAddress;
     }
 
+    public InetAddress getSourceIp() {
+        try {
+            return InetAddress.getByAddress(getSourceAddress());
+        } catch (UnknownHostException e) {
+            return null;
+        }
+    }
+
     public byte[] getDestinationAddress() {
         return destinationAddress;
+    }
+
+    public InetAddress getDestinationIp() {
+        try {
+            return InetAddress.getByAddress(getDestinationAddress());
+        } catch (UnknownHostException e) {
+            return null;
+        }
     }
 
     public byte[] getData() {

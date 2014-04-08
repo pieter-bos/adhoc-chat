@@ -13,6 +13,10 @@ public class PacketImpl implements Packet {
         this.destination = destination;
     }
 
+    public PacketImpl(RawPacket packet) {
+        this(packet.getData(), packet.getSourceIp(), packet.getDestinationIp());
+    }
+
     @Override
     public InetAddress getSourceAddress() {
         return source;
