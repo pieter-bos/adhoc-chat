@@ -2,7 +2,7 @@
 <module type="JAVA_MODULE" version="4">
   <component name="NewModuleRootManager" inherit-compiler-output="false">
     <output url="file://$MODULE_DIR$/out/production/adhoc-chat" />
-    <output-test url="file://out/test/adhoc-chat" />
+    <output-test url="file://$MODULE_DIR$/out/test/adhoc-chat" />
     <exclude-output />
     <content url="file://$MODULE_DIR$">
       <sourceFolder url="file://$MODULE_DIR$/src" isTestSource="false" />
