@@ -4,11 +4,14 @@ import java.io.IOException;
 import java.net.DatagramPacket;
 import java.net.InetAddress;
 import java.net.MulticastSocket;
+import java.util.HashSet;
 import java.util.concurrent.LinkedBlockingQueue;
 
 public class SocketImpl implements Socket {
     private static final String GROUP = "224.224.224.224";
+
     private MulticastSocket mulSocket;
+
     private boolean connected = false;
 
     private InetAddress group;
@@ -16,7 +19,9 @@ public class SocketImpl implements Socket {
 
     private ReceiverThread receiverThread;
 
-    private LinkedBlockingQueue<Packet> packetQueue;
+    private LinkedBlockingQueue<Packet> packetQueue = new LinkedBlockingQueue<>();
+
+    private HashSet<InetAddress> network = new HashSet<>();
 
     public SocketImpl(int port) throws IOException {
         this.port = port;
@@ -27,9 +32,15 @@ public class SocketImpl implements Socket {
 
         receiverThread = new ReceiverThread(mulSocket);
 
-        receiverThread.addPacketListener(new ApplicationDataHandler(packetQueue));
+        receiverThread.addPacketListener(new SynHandler(this, network));
+        receiverThread.addPacketListener(new BroadcastHandler(this));
+        receiverThread.addPacketListener(new LocalHandler(this, packetQueue));
 
         receiverThread.start();
+    }
+
+    public InetAddress getAddress() {
+        return mulSocket.getLocalAddress();
     }
 
     @Override
@@ -43,9 +54,14 @@ public class SocketImpl implements Socket {
 
     }
 
-    private void send(RawPacket packet) throws IOException {
+    protected synchronized void send(RawPacket packet) {
         DatagramPacket datagram = new DatagramPacket(packet.getData(), packet.getLength(), group, port);
-        mulSocket.send(datagram);
+
+        try {
+            mulSocket.send(datagram);
+        } catch(IOException e) {
+            connected = false;
+        }
     }
 
     @Override

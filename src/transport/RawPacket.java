@@ -4,21 +4,21 @@ import exceptions.InvalidPacketException;
 
 import java.net.Inet4Address;
 import java.nio.ByteBuffer;
-import java.util.Arrays;
 
 public class RawPacket {
-    public static final int MIN_SIZE = 17;
+    public static final int MIN_SIZE = 21;
 
-    private static final byte SYN_MASK =      0b00000001;
-    private static final byte ACK_MASK =      0b00000010;
-    private static final byte MAGIC_MASK =    0b00000100;
-    private static final byte EVIL_MASK =     0b00001000;
-    private static final byte RESERVED_MASK = 0b00100000;
+    public static final byte SYN_MASK =      0b00000001;
+    public static final byte ACK_MASK =      0b00000010;
+    public static final byte MAGIC_MASK =    0b00000100;
+    public static final byte EVIL_MASK =     0b00001000;
+    public static final byte RESERVED_MASK = 0b00100000;
 // private static final byte ZERO_MASK = 0b10000000; this bit must always be zero because evil stupid java only has signed byte.
 
     private byte flags;
     private int sequenceNumber;
     private int acknowledgmentNumber;
+    private int retransmissionNumber;
     private byte[] sourceAddress = new byte[4];
     private byte[] destinationAddress = new byte[4];
     private byte[] data;
@@ -34,6 +34,7 @@ public class RawPacket {
             }
             sequenceNumber = bb.getInt();
             acknowledgmentNumber = bb.getInt();
+            retransmissionNumber = bb.getInt();
 
             for (int i = 0; i < 4; i++) {
                 sourceAddress[i] = bb.get();
@@ -46,25 +47,25 @@ public class RawPacket {
         }
     }
 
-    public RawPacket(byte flags, int sequenceNumber, int acknowledgmentNumber,
+    public RawPacket(byte flags, int sequenceNumber, int acknowledgmentNumber, int retransmissionNumber,
                      Inet4Address sourceAddress, Inet4Address destinationAddress) throws InvalidPacketException {
-        this(flags, sequenceNumber, acknowledgmentNumber,
+        this(flags, sequenceNumber, acknowledgmentNumber, retransmissionNumber,
                 sourceAddress.getAddress(), destinationAddress.getAddress(), null);
     }
 
-    public RawPacket(byte flags, int sequenceNumber, int acknowledgmentNumber,
+    public RawPacket(byte flags, int sequenceNumber, int acknowledgmentNumber, int retransmissionNumber,
                      Inet4Address sourceAddress, Inet4Address destinationAddress,
                      byte[] data) throws InvalidPacketException {
-        this(flags, sequenceNumber, acknowledgmentNumber,
+        this(flags, sequenceNumber, acknowledgmentNumber, retransmissionNumber,
                 sourceAddress.getAddress(), destinationAddress.getAddress(), data);
     }
 
-    public RawPacket(byte flags, int sequenceNumber, int acknowledgmentNumber,
+    public RawPacket(byte flags, int sequenceNumber, int acknowledgmentNumber, int retransmissionNumber,
                      byte[] sourceAddress, byte[] destinationAddress) throws InvalidPacketException {
-        this(flags, sequenceNumber, acknowledgmentNumber, sourceAddress, destinationAddress, null);
+        this(flags, sequenceNumber, acknowledgmentNumber, retransmissionNumber, sourceAddress, destinationAddress, null);
     }
 
-    public RawPacket(byte flags, int sequenceNumber, int acknowledgmentNumber,
+    public RawPacket(byte flags, int sequenceNumber, int acknowledgmentNumber, int retransmissionNumber,
                      byte[] sourceAddress, byte[] destinationAddress, byte[] data) throws InvalidPacketException {
         if (flags < 0) {
             throw new InvalidPacketException(":(");
@@ -74,6 +75,7 @@ public class RawPacket {
             this.flags = flags;
             this.sequenceNumber = sequenceNumber;
             this.acknowledgmentNumber = acknowledgmentNumber;
+            this.retransmissionNumber = retransmissionNumber;
             this.sourceAddress = sourceAddress.clone();
             this.destinationAddress = destinationAddress.clone();
             if (data != null) {
@@ -126,6 +128,7 @@ public class RawPacket {
         buffer.put(flags);
         buffer.putInt(sequenceNumber);
         buffer.putInt(acknowledgmentNumber);
+        buffer.putInt(retransmissionNumber);
         buffer.put(sourceAddress);
         buffer.put(destinationAddress);
         buffer.put(data);
@@ -135,6 +138,16 @@ public class RawPacket {
 
     public int getLength() {
         return MIN_SIZE + data.length;
+    }
+
+    @Override
+    public int hashCode() {
+        ByteBuffer buffer = ByteBuffer.allocate(12);
+        buffer.putInt(sequenceNumber);
+        buffer.putInt(retransmissionNumber);
+        buffer.put(sourceAddress);
+        buffer.reset();
+        return buffer.hashCode();
     }
 
     public static RawPacket tryParse(byte[] packet) {
