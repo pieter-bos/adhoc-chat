@@ -1,0 +1,11 @@
+.container{
+    padding: 15px;
+}
+
+a {
+    cursor: pointer;
+}
+
+#user-list span{
+    float: right;
+}
