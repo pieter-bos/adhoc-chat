@@ -17,13 +17,18 @@
 
 <div class="container">
     <div class="row">
-        <div class="col-md-4">
-            <div ng-controller="userController" class="well">
+        <div class="col-md-4" ng-controller="userController">
+            <div class="well">
+                <form class="form" role="form">
+                    <input ng-model="nick" type="text" class="form-control" placeholder="Choose your nickname" />
+                </form>
+            </div>
+            <div class="well">
                 <ul class="nav nav-pills nav-stacked">
                     <li ng-repeat="user in users">
                         <a>
                             {{user.name}}
-                            <span ng-click="addToConversation()" class="glyphicon glyphicon-plus"></span>
+                            <span ng-click="addToConversation()" id="add-to-conv" class="glyphicon glyphicon-plus"></span>
                         </a>
                     </li>
                 </ul>
@@ -39,7 +44,16 @@
                 </li>
             </ul>
             <div class="tab-content">
-                <div ng-repeat="conversation in conversations" class="tab-pane"></div>
+                <div ng-repeat="conversation in conversations" id="{{conversation.id}}" class="tab-pane">
+                    <ul class="list-unstyled message-field">
+                        <li ng-repeat="message in conversation.messages">{{message.name}} : {{message.text}}</li>
+                    </ul>
+                    <form ng-submit="sendMessage()" class="form-inline" role="form">
+                        <input ng-model="conversation.message" type="text" class="form-control" >
+                        <input class="btn btn-primary" type="submit" value="Send">
+                    </form>
+
+                </div>
             </div>
         </div>
     </div>

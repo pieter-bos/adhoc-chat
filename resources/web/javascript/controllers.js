@@ -4,6 +4,8 @@ var socket = new WebSocket('ws://localhost:8081/');
 function Conversation() {
     this.id = Math.floor((Math.random()*100000)+1);
     this.members = [];
+    this.message = "";
+    this.messages = [];
 
     this.title = function() {
         return this.id;
@@ -17,6 +19,8 @@ function Conversation() {
 }
 
 chatApp.controller('userController', function ($scope, $rootScope) {
+    $scope.nick = '';
+
     $scope.users = [
         {name: 'Laurens'},
         {name: 'Sophie'}
@@ -45,6 +49,15 @@ chatApp.controller('conversationController', function($scope, $rootScope) {
 
     $rootScope.$on('addMember', function(e, user) {
         $scope.active.addMember(user);
-        console.log('on');
+        socket.send({conversation: $scope.active.id, member: user.name});
     });
+
+    $scope.sendMessage = function() {
+        if (this.conversation.message != '') {
+            socket.send({text: this.conversation.message});
+            console.log(this.conversation.message);
+            this.conversation.messages.push({name: 'you', text: this.conversation.message});
+            this.conversation.message = "";
+        }
+    }
 });
