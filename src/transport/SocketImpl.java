@@ -24,8 +24,11 @@ public class SocketImpl implements Socket {
 
     private HashSet<InetAddress> network = new HashSet<>();
 
-    private HashMap<InetAddress, Integer> sendSequenceNumbers = new HashMap<>();
-    private HashMap<InetAddress, Integer> receivedSequenceNumbers = new HashMap<>();
+    private HashMap<InetAddress, Integer> sendLastSequenceNumbers = new HashMap<>();
+    private HashMap<InetAddress, Integer> receivedLastSequenceNumbers = new HashMap<>();
+
+    // Destination, (SequenceNumber, Packet)
+    private HashMap<InetAddress, HashMap<Integer, Packet>> unAckedSendPackets = new HashMap<>();
 
     private Random random = new SecureRandom();
 
@@ -110,28 +113,34 @@ public class SocketImpl implements Socket {
     }
 
     public void makeSequenceNumber(InetAddress sourceIp) {
-        synchronized (sendSequenceNumbers) {
-            if (!sendSequenceNumbers.containsKey(sourceIp)) {
-                sendSequenceNumbers.put(sourceIp, randInt());
+        synchronized (sendLastSequenceNumbers) {
+            if (!sendLastSequenceNumbers.containsKey(sourceIp)) {
+                sendLastSequenceNumbers.put(sourceIp, 0);
             }
         }
     }
 
     public void gotSequenceNumber(InetAddress sourceIp, int sequenceNumber) {
-        synchronized (receivedSequenceNumbers) {
-            receivedSequenceNumbers.put(sourceIp, sequenceNumber);
+        synchronized (receivedLastSequenceNumbers) {
+            receivedLastSequenceNumbers.put(sourceIp, sequenceNumber);
         }
     }
 
     public int lastSequenceNumber(InetAddress sourceIp) {
-        return receivedSequenceNumbers.get(sourceIp);
+        return receivedLastSequenceNumbers.get(sourceIp);
     }
 
     public int getSequenceNumber(InetAddress sourceIp) {
-        synchronized (sendSequenceNumbers) {
-            int result = sendSequenceNumbers.get(sourceIp);
-            sendSequenceNumbers.put(sourceIp, result + 1);
+        synchronized (sendLastSequenceNumbers) {
+            int result = sendLastSequenceNumbers.get(sourceIp);
+            sendLastSequenceNumbers.put(sourceIp, result + 1);
             return result;
+        }
+    }
+
+    public void gotAck(InetAddress sourceIp, int acknowledgmentNumber) {
+        if (unAckedSendPackets.containsKey(sourceIp)) {
+            unAckedSendPackets.get(sourceIp).remove(acknowledgmentNumber);
         }
     }
 }
