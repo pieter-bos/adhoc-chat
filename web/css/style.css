@@ -5,3 +5,7 @@
 a {
     cursor: pointer;
 }
+
+#user-list span{
+    float: right;
+}
