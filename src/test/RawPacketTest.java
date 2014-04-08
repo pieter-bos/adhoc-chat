@@ -1,8 +1,10 @@
 package test;
 
 import org.junit.Test;
+import org.junit.runner.RunWith;
 import transport.RawPacket;
 
+@RunWith(org.junit.runners.JUnit4.class)
 public class RawPacketTest {
     @Test
     public void testGetData() throws Exception {

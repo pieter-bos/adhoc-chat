@@ -120,8 +120,26 @@ public class RawPacket {
         return data;
     }
 
+    public byte[] getBytes() {
+        ByteBuffer buffer = ByteBuffer.allocate(getLength());
+
+        buffer.put(flags);
+        buffer.putInt(sequenceNumber);
+        buffer.putInt(acknowledgmentNumber);
+        buffer.put(sourceAddress);
+        buffer.put(destinationAddress);
+        buffer.put(data);
+
+        return buffer.array();
+    }
+
+    public int getLength() {
+        return MIN_SIZE + data.length;
+    }
+
     public static RawPacket tryParse(byte[] packet) {
         RawPacket result = null;
+
         try {
             result =  new RawPacket(packet);
         } catch (InvalidPacketException e) { }

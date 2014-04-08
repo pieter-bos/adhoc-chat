@@ -1,17 +1,35 @@
 package transport;
 
 import java.io.IOException;
+import java.net.DatagramPacket;
 import java.net.InetAddress;
 import java.net.MulticastSocket;
+import java.util.concurrent.LinkedBlockingQueue;
 
 public class SocketImpl implements Socket {
     private static final String GROUP = "224.224.224.224";
     private MulticastSocket mulSocket;
     private boolean connected = false;
 
+    private InetAddress group;
+    private int port;
+
+    private ReceiverThread receiverThread;
+
+    private LinkedBlockingQueue<Packet> packetQueue;
+
     public SocketImpl(int port) throws IOException {
+        this.port = port;
+        this.group = InetAddress.getByName(GROUP);
+
         mulSocket = new MulticastSocket(port);
-        mulSocket.joinGroup(InetAddress.getByName(GROUP));
+        mulSocket.joinGroup(group);
+
+        receiverThread = new ReceiverThread(mulSocket);
+
+        receiverThread.addPacketListener(new ApplicationDataHandler(packetQueue));
+
+        receiverThread.start();
     }
 
     @Override
@@ -22,8 +40,12 @@ public class SocketImpl implements Socket {
     }
 
     private void syn() {
-        // TODO implement this thing
 
+    }
+
+    private void send(RawPacket packet) throws IOException {
+        DatagramPacket datagram = new DatagramPacket(packet.getData(), packet.getLength(), group, port);
+        mulSocket.send(datagram);
     }
 
     @Override
@@ -43,7 +65,11 @@ public class SocketImpl implements Socket {
 
     @Override
     public Packet receive() {
-        return null;
+        try {
+            return packetQueue.take();
+        } catch (InterruptedException e) {
+            return null;
+        }
     }
 
     @Override
