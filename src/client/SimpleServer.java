@@ -1,13 +1,10 @@
 package client;
 
-import com.sun.net.httpserver.HttpServer;
 import org.simpleframework.http.Request;
 import org.simpleframework.http.Response;
 import org.simpleframework.http.core.Container;
 import org.simpleframework.http.core.ContainerServer;
-import org.simpleframework.transport.Server;
 import org.simpleframework.transport.connect.SocketConnection;
-import sun.net.httpserver.HttpServerImpl;
 
 import java.io.IOException;
 import java.io.PrintStream;
