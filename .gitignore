@@ -12,6 +12,7 @@
 .idea/tasks.xml
 .idea/misc.xml
 .idea/copyright/
+out/
 
 # tex files
 *.aux

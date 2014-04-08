@@ -1,49 +1,48 @@
 <!DOCTYPE html>
-<html>
+<html ng-app="chatApp">
 <head lang="en">
     <meta charset="UTF-8">
     <title>Chat4Blub</title>
     <link rel="stylesheet" href="css/bootstrap.css"/>
     <link rel="stylesheet" href="css/style.css"/>
+
+    <script src="javascript/angular.js"></script>
+    <script src="javascript/controllers.js"></script>
+
+    <script src="javascript/jquery.js"></script>
+    <script src="javascript/bootstrap.js"></script>
+    <script src="javascript/fancy.js"></script>
 </head>
 <body>
 
 <div class="container">
     <div class="row">
         <div class="col-md-4">
-            <div class="well">
-                <ul id="user-list" class="nav nav-pills nav-stacked">
-                    <li><a>Persoon 1<span class="glyphicon glyphicon-plus"></span></button></a></li>
-
-                    <li><a>Persoon 2<span class="glyphicon glyphicon-plus"></span></button></a></li>
-
-                    <li><a>Persoon 3<span class="glyphicon glyphicon-plus"></span></button></a></li>
-
-                    <li><a>Persoon 4<span class="glyphicon glyphicon-plus"></span></button></a></li>
-
-                    <li><a>Persoon 5<span class="glyphicon glyphicon-plus"></span></button></a></li>
-
+            <div ng-controller="userController" class="well">
+                <ul class="nav nav-pills nav-stacked">
+                    <li ng-repeat="user in users">
+                        <a>
+                            {{user.name}}
+                            <span ng-click="addToConversation()" class="glyphicon glyphicon-plus"></span>
+                        </a>
+                    </li>
                 </ul>
             </div>
         </div>
-        <div class="col-md-8">
-            <ul id="chat-tabs" class="nav nav-tabs">
-                <li class="active"><a>Chat 1</a><div><textarea></textarea></div></li>
-                <li><a>Chat 2</a></li>
-                <li><a>Chat 3</a></li>
-                <li><a><span class="glyphicon glyphicon-plus"></span></a></li>
-
+        <div ng-controller="conversationController" class="col-md-8">
+            <ul class="nav nav-tabs">
+                <li ng-repeat="conversation in conversations" ng-click="setActive()">
+                    <a href="#{{conversation.id}}" data-toggle="tab">{{conversation.title()}}</a>
+                </li>
+                <li ng-click="addConversation()">
+                    <a><span class="glyphicon glyphicon-plus"></span> Start new conversation</a>
+                </li>
             </ul>
-
+            <div class="tab-content">
+                <div ng-repeat="conversation in conversations" class="tab-pane"></div>
+            </div>
         </div>
-
     </div>
-
-
 </div>
-
-<script src="javascript/jquery.js"></script>
-<script src="javascript/bootstrap.js"></script>
-<script src="javascript/fancy.js"></script>
 </body>
 </html>
