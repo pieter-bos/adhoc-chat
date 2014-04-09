@@ -104,7 +104,7 @@ public class SocketImpl implements Socket {
     }
 
     protected synchronized void send(RawPacket packet) {
-        DatagramPacket datagram = new DatagramPacket(packet.getData(), packet.getLength(), group, port);
+        DatagramPacket datagram = new DatagramPacket(packet.getBytes(), packet.getLength(), group, port);
 
         try {
             mulSocket.send(datagram);
