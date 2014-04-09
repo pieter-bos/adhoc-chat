@@ -45,7 +45,6 @@ chatApp.controller('userController', function ($scope, $rootScope) {
             }
             if (nick != ""  && nick != "you" && nick!="You" && nick!=null) {
                 $scope.nick = nick;
-                console.log($scope.users);
             } else {
                 nick = "";
             };
@@ -84,11 +83,15 @@ chatApp.controller('conversationController', function($scope, $rootScope) {
     }
 
     $scope.isActive = function(conversation) {
-        console.log(conversation.id + ': ' + ($scope.active == conversation));
         return $scope.active == conversation ? 'active' : '';
     }
 
     $scope.leaveConversation = function() {
-        console.log("clicked leave conv");
+        //Verwijder current persoon uit gesprek
+
+        //Sluit tab met het gesprek
+        var conv = $scope.conversations.indexOf(this.conversation);
+        $scope.conversations.splice(conv, conv+1);
+        $scope.active = $scope.conversations[0];
     }
 });
