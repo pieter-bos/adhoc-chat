@@ -22,14 +22,35 @@ chatApp.controller('userController', function ($scope, $rootScope) {
     $scope.nick = '';
 
     $scope.users = [
-        {name: 'Laurens'},
-        {name: 'Sophie'}
+        {name: "Laurens"},
+        {name: "Sophie"}
     ];
 
     $scope.addToConversation = function() {
         $rootScope.$emit('addMember', this.user);
         console.log('emit');
     }
+
+    angular.element(document).ready(function() {
+        var nick = "";
+        while (nick == "") {
+            nick = prompt("What would you like your chat name to be?");
+            var i=0;
+            while (i<$scope.users.length) {
+                if (nick == $scope.users[i].name){
+                    nick="";
+                    break;
+                }
+                i++;
+            }
+            if (nick != ""  && nick != "you" && nick!="You" && nick!=null) {
+                $scope.nick = nick;
+                $scope.users.push({name: nick});
+                console.log($scope.users);
+            } else {
+                nick = "";
+            };
+    }});
 });
 
 chatApp.controller('conversationController', function($scope, $rootScope) {
