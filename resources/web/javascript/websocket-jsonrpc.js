@@ -9,6 +9,8 @@ function WebSocketJSONRPC(url) {
 
     this.socket.onmessage = function(e) {
         var data = JSON.parse(e.data);
+
+        console.log(data);
     }
 
     this.socket.onerror = function(e) {
