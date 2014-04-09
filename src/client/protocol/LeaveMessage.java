@@ -14,6 +14,7 @@ public class LeaveMessage extends NetworkMessage {
     public LeaveMessage(int conversation) {
         this.conversation = conversation;
     }
+
     @Override
     public byte[] toByteArray() {
         return new byte[0];
