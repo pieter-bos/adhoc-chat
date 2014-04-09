@@ -8,7 +8,10 @@ import java.util.HashSet;
 public class BroadcastHandler implements PacketListener {
     private SocketImpl socket;
 
-    private HashSet<RawPacket> packets = new HashSet<>();
+    /**
+     * Hashes of already forwarded packets.
+     */
+    private HashSet<Integer> packets = new HashSet<>();
 
     public BroadcastHandler(SocketImpl socket) {
         this.socket = socket;
@@ -17,8 +20,8 @@ public class BroadcastHandler implements PacketListener {
     @Override
     public void onPacketReceived(RawPacket packet) {
         if(!Arrays.equals(packet.getDestinationAddress(), socket.getAddress().getAddress())) {
-            if(!packets.contains(packet)) {
-                packets.add(packet);
+            if(!packets.contains(packet.hashCode())) {
+                packets.add(packet.hashCode());
                 socket.send(packet);
             }
         }
