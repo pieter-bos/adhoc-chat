@@ -1,5 +1,7 @@
 package transport;
 
+import exceptions.InvalidPacketException;
+
 import java.net.InetAddress;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -38,6 +40,12 @@ public class LocalHandler implements PacketListener {
                 received.add(packet.getSequenceNumber());
                 receivedPackets.put(packet.getSequenceNumber(), new PacketImpl(packet));
 
+                // Send Ack
+                try {
+                    socket.send(new RawPacket(RawPacket.ACK_MASK, socket.getSequenceNumber(packet.getSourceIp()),
+                            packet.getSequenceNumber(), 0, socket.getAddress(), packet.getSourceIp()));
+                } catch (InvalidPacketException e) {  }
+
                 while(received.size() > 0 && received.first() == socket.lastSequenceNumber(packet.getSourceIp()) + 1) {
                     int packetNo = received.first();
                     received.remove(packetNo);
@@ -46,9 +54,15 @@ public class LocalHandler implements PacketListener {
 
                     try {
                         packetQueue.put(queuePacket);
-                        // TODO send ack
-                        // TODO call gotSequenceNumber(sourceIP, number)
-                    } catch (InterruptedException e) {  }
+                        socket.gotSequenceNumber(queuePacket.getSourceAddress(), packetNo);
+
+                        /*
+                        // Send Ack
+                        socket.send(new RawPacket(RawPacket.ACK_MASK,
+                                socket.getSequenceNumber(queuePacket.getSourceAddress()),
+                                packetNo, 0, socket.getAddress(), packet.getSourceIp()));
+                                */
+                    } catch (InterruptedException e) {  } // catch (InvalidPacketException e) {  }
                 }
             }
         }
