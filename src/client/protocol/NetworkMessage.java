@@ -3,10 +3,10 @@ package client.protocol;
 /**
  * Interface for network messages
  */
-public interface NetworkMessage extends Message {
+public abstract class NetworkMessage extends Message {
     /**
      * returns the byte representation of the message
      * @return message
      */
-    public byte[] toByteArray();
+    public abstract byte[] toByteArray();
 }
