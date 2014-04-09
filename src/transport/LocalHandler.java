@@ -56,13 +56,7 @@ public class LocalHandler implements PacketListener {
                         packetQueue.put(queuePacket);
                         socket.gotSequenceNumber(queuePacket.getSourceAddress(), packetNo);
 
-                        /*
-                        // Send Ack
-                        socket.send(new RawPacket(RawPacket.ACK_MASK,
-                                socket.getSequenceNumber(queuePacket.getSourceAddress()),
-                                packetNo, 0, socket.getAddress(), packet.getSourceIp()));
-                                */
-                    } catch (InterruptedException e) {  } // catch (InvalidPacketException e) {  }
+                    } catch (InterruptedException e) {  }
                 }
             }
         }

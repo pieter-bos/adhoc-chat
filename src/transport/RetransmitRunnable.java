@@ -24,7 +24,7 @@ public class RetransmitRunnable extends TimerTask {
         }
 
         if(packet.getRetransmissionNumber() >= SocketImpl.MAX_RETRANSMITS) {
-            network.remove(packet.getDestinationIp());
+            socket.removeDestination(packet.getDestinationIp());
         } else {
             try {
                 RawPacket retransmit = new RawPacket(packet.getFlags(), packet.getSequenceNumber(),

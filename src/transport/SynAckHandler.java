@@ -13,7 +13,7 @@ public class SynAckHandler implements PacketListener {
     private final HashSet<InetAddress> candidates;
     private final HashSet<InetAddress> verified;
 
-    public SynAckHandler(ReentrantLock lock, Condition condition, HashSet<InetAddress> candidates, HashSet<InetAddress> verified, SocketImpl socket) {
+    public SynAckHandler(ReentrantLock lock, Condition condition, HashSet<InetAddress> candidates, HashSet<InetAddress> verified) {
         this.lock = lock;
         this.condition = condition;
         this.candidates = candidates;

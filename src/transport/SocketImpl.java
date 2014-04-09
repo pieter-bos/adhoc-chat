@@ -2,12 +2,12 @@ package transport;
 
 import exceptions.InvalidPacketException;
 
+import javax.swing.undo.CannotRedoException;
 import java.io.IOException;
 import java.net.DatagramPacket;
 import java.net.InetAddress;
 import java.net.MulticastSocket;
 import java.net.UnknownHostException;
-import java.security.SecureRandom;
 import java.util.*;
 import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.TimeUnit;
@@ -19,6 +19,7 @@ public class SocketImpl implements Socket {
     private static final int MAX_TRIES = 3;
     private static final long SYN_TIMEOUT = 2000;
     private static final TimeUnit SYN_TIMEOUT_UNIT = TimeUnit.MILLISECONDS;
+    private static final int SYN_INTERVAL = 60*1000;
     private static final String BROADCAST_DESTINATION = "192.168.1.0";
     private static final long RETRANSMIT_DELAY = 1500;
     protected static final int MAX_RETRANSMITS = 5;
@@ -47,8 +48,10 @@ public class SocketImpl implements Socket {
      */
     private final HashMap<InetAddress, Integer> receivedLastSequenceNumbers = new HashMap<>();
 
-    // Destination, (SequenceNumber, Packet)
-    private HashMap<InetAddress, HashMap<Integer, RawPacket>> unAckedSendPackets = new HashMap<>();
+    /**
+     * Sequence numbers of send and not yet acked packets per destination.
+     */
+    private HashMap<InetAddress, HashSet<Integer>> unAckedSendPackets = new HashMap<>();
 
     public SocketImpl(int port) throws IOException {
         this.port = port;
@@ -72,7 +75,19 @@ public class SocketImpl implements Socket {
 
     @Override
     public void connect() {
+        if (connected) {
+            throw new CannotRedoException();
+        }
+
         syn();
+
+        // Periodically repeat syn.
+        new Timer().schedule(new TimerTask() {
+            @Override
+            public void run() {
+                syn();
+            }
+        }, SYN_INTERVAL, SYN_INTERVAL);
 
         connected = true;
     }
@@ -87,15 +102,14 @@ public class SocketImpl implements Socket {
         ReentrantLock lock = new ReentrantLock();
         Condition condition = lock.newCondition();
 
+        SynAckHandler handler = new SynAckHandler(lock, condition, candidates, verified);
         while(tries < MAX_TRIES && (!candidates.equals(verified) || verified.size() == 0)) {
-            SynAckHandler handler = new SynAckHandler(lock, condition, candidates, verified, this);
-
             lock.lock();
             receiverThread.addPacketListener(handler);
 
 
             try {
-                send(new RawPacket(RawPacket.SYN_MASK, 0, 0, tries, getAddress(), InetAddress.getByName(BROADCAST_DESTINATION)));
+                send(new RawPacket(RawPacket.SYN_MASK, 0, 0, (int) System.currentTimeMillis(), getAddress(), InetAddress.getByName(BROADCAST_DESTINATION)));
             } catch (InvalidPacketException | UnknownHostException e) {  }
 
             try {
@@ -136,7 +150,7 @@ public class SocketImpl implements Socket {
             packet = new RawPacket((byte) 0, seq, 0, 0, getAddress(), destination, data);
         } catch (InvalidPacketException e) {  }
 
-        getUnAckedPackets(destination).put(seq, packet);
+        getUnAckedPackets(destination).add(seq);
 
         awaitAck(packet);
 
@@ -147,9 +161,9 @@ public class SocketImpl implements Socket {
         new Timer().schedule(new RetransmitRunnable(this, packet, network), RETRANSMIT_DELAY);
     }
 
-    private HashMap<Integer, RawPacket> getUnAckedPackets(InetAddress destination) {
+    private HashSet<Integer> getUnAckedPackets(InetAddress destination) {
         if(unAckedSendPackets.get(destination) == null) {
-            unAckedSendPackets.put(destination, new HashMap<Integer, RawPacket>());
+            unAckedSendPackets.put(destination, new HashSet<Integer>());
         }
 
         return unAckedSendPackets.get(destination);
@@ -190,7 +204,9 @@ public class SocketImpl implements Socket {
 
     public void gotSequenceNumber(InetAddress sourceIp, int sequenceNumber) {
         synchronized (receivedLastSequenceNumbers) {
-            receivedLastSequenceNumbers.put(sourceIp, sequenceNumber);
+            if (!receivedLastSequenceNumbers.containsKey(sourceIp) || lastSequenceNumber(sourceIp) < sequenceNumber) {
+                receivedLastSequenceNumbers.put(sourceIp, sequenceNumber);
+            }
         }
     }
 
@@ -213,6 +229,15 @@ public class SocketImpl implements Socket {
     }
 
     public boolean isAcked(InetAddress destination, int sequenceNumber) {
-        return !getUnAckedPackets(destination).containsKey(sequenceNumber);
+        return !getUnAckedPackets(destination).contains(sequenceNumber);
+    }
+
+    public void removeDestination(InetAddress ip) {
+        synchronized (network) {
+            network.remove(ip);
+        }
+        synchronized (unAckedSendPackets) {
+            unAckedSendPackets.remove(ip);
+        }
     }
 }
