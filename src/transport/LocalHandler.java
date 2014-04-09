@@ -9,7 +9,9 @@ import java.util.concurrent.LinkedBlockingQueue;
 public class LocalHandler implements PacketListener {
     private final SocketImpl socket;
     private final LinkedBlockingQueue<Packet> packetQueue;
+    // All (out of order) received sequence numbers
     private SortedSet<Integer> received;
+    // All (out of order) received packets
     private HashMap<Integer, Packet> receivedPackets;
 
     public LocalHandler(SocketImpl socket, LinkedBlockingQueue<Packet> packetQueue) {
@@ -19,17 +21,19 @@ public class LocalHandler implements PacketListener {
 
     @Override
     public void onPacketReceived(RawPacket packet) {
-        if(packet.isSyn() && !packet.isAck()) {
+        // Syn and SynAck are handled elsewhere.
+        if(packet.isSyn()) {
             return;
         }
 
-        if(packet.getDestinationIp().equals(socket.getAddress())) {
+        // Packets for others are send on elsewhere
+        if(!packet.getDestinationIp().equals(socket.getAddress())) {
             return;
         }
 
-        if(packet.isAck() && !packet.isSyn()) { // ACK
+        if(packet.isAck()) { // ACK
             socket.gotAck(packet.getSourceIp(), packet.getAcknowledgmentNumber());
-        } else if(!packet.isAck() && !packet.isSyn()) { // DATA
+        } else if(!packet.isAck()) { // DATA
             if(socket.hasOtherClient(packet.getSourceIp())) {
                 received.add(packet.getSequenceNumber());
                 receivedPackets.put(packet.getSequenceNumber(), new PacketImpl(packet));
@@ -42,6 +46,8 @@ public class LocalHandler implements PacketListener {
 
                     try {
                         packetQueue.put(queuePacket);
+                        // TODO send ack
+                        // TODO call gotSequenceNumber(sourceIP, number)
                     } catch (InterruptedException e) {  }
                 }
             }
