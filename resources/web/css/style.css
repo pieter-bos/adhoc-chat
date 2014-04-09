@@ -23,3 +23,8 @@ body {
     overflow-y: scroll;
     padding: 15px;
 }
+
+#leave-conv {
+    float:right;
+    margin-right: 15px;
+}

@@ -43,9 +43,11 @@
                     <ul class="list-unstyled message-field">
                         <li ng-repeat="message in conversation.messages">{{message.name}} : {{message.text}}</li>
                     </ul>
+
                     <form ng-submit="sendMessage()" class="form-inline" role="form">
                         <input ng-model="conversation.message" type="text" class="form-control" >
                         <input class="btn btn-primary" type="submit" value="Send">
+                        <input ng-click="leaveConversation()" id="leave-conv" class="btn btn-danger" type="button" value="Leave Conversation">
                     </form>
 
                 </div>

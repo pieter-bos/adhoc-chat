@@ -45,7 +45,6 @@ chatApp.controller('userController', function ($scope, $rootScope) {
             }
             if (nick != ""  && nick != "you" && nick!="You" && nick!=null) {
                 $scope.nick = nick;
-                $scope.users.push({name: nick});
                 console.log($scope.users);
             } else {
                 nick = "";
@@ -80,5 +79,9 @@ chatApp.controller('conversationController', function($scope, $rootScope) {
             this.conversation.messages.push({name: 'you', text: this.conversation.message});
             this.conversation.message = "";
         }
+    }
+
+    $scope.leaveConversation = function() {
+        console.log("clicked leave conv");
     }
 });
