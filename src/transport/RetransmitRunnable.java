@@ -27,7 +27,11 @@ public class RetransmitRunnable extends TimerTask {
             network.remove(packet.getDestinationIp());
         } else {
             try {
-                socket.awaitAck(new RawPacket(packet.getFlags(), packet.getSequenceNumber(), packet.getAcknowledgmentNumber(), packet.getRetransmissionNumber() + 1, packet.getSourceAddress(), packet.getDestinationAddress(), packet.getData()));
+                RawPacket retransmit = new RawPacket(packet.getFlags(), packet.getSequenceNumber(),
+                        packet.getAcknowledgmentNumber(), packet.getRetransmissionNumber() + 1,
+                        packet.getSourceAddress(), packet.getDestinationAddress(), packet.getData());
+                socket.send(retransmit);
+                socket.awaitAck(retransmit);
             } catch (InvalidPacketException e) {  }
         }
     }
