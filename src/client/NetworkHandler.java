@@ -1,31 +1,29 @@
 package client;
 
-import client.protocol.Message;
+import client.protocol.NetworkMessage;
 import transport.Socket;
 
 /**
  * NetworkHandler handles all network traffic.
  */
 public class NetworkHandler extends Thread {
-    private ClientHandler clientHandler = null;
-    private Socket socket = null;
-    private boolean isListening = true;
+    private ClientHandler client;
+    private Socket socket;
+    private boolean listening = true;
 
     /**
      * Constructor of NetworkHandler
      * @param port
-     * @param clientHandler
+     * @param client
      */
-    public void NetworkHandler(int port, ClientHandler clientHandler){
-        this.clientHandler = clientHandler;
+    public NetworkHandler(int port, ClientHandler client){
+        this.client = client;
         //TODO: make socket
-
     }
 
     @Override
     public void run() {
-
-        while (this.isListening) {
+        while (this.listening) {
             // Handel berichten af
         }
     }
@@ -34,7 +32,7 @@ public class NetworkHandler extends Thread {
      * Writes the message to the network
      * @param message
      */
-    public void write(Message message) {
+    public void write(NetworkMessage message) {
         socket.send(message.toByteArray(), null);
     }
 }

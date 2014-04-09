@@ -48,7 +48,6 @@ public class ClientHandler extends WebSocketServer {
     @Override
     public void onError(WebSocket webSocket, Exception e) {
         // Broadcast ("we zijn er niet meer")
-
     }
 
     /**
