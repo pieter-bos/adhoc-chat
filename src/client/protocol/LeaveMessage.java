@@ -4,6 +4,7 @@ package client.protocol;
  * Tells others that this client is leaving the conversation
  */
 public class LeaveMessage extends NetworkMessage {
+    private final String type = "leave";
     private int conversation;
 
     /**
