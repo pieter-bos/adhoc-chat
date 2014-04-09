@@ -5,6 +5,7 @@ package client.protocol;
  */
 public class InviteMessage extends NetworkMessage {
     private final String type = "invite";
+    private String source;
     private int conversation;
     private String[] members;
 
@@ -13,7 +14,8 @@ public class InviteMessage extends NetworkMessage {
      * @param conversation ID of the conversation
      * @param members Other members of the conversation
      */
-    public InviteMessage(int conversation, String[] members) {
+    public InviteMessage(String source, int conversation, String[] members) {
+        this.source = source;
         this.conversation = conversation;
         this.members = members;
     }
