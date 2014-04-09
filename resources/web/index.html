@@ -31,7 +31,7 @@
         </div>
         <div ng-controller="conversationController" class="col-md-8">
             <ul class="nav nav-tabs">
-                <li ng-repeat="conversation in conversations" ng-click="setActive()">
+                <li ng-repeat="conversation in conversations" ng-click="setActive()" class="{{isActive(conversation)}}">
                     <a href="#{{conversation.id}}" data-toggle="tab">{{conversation.title()}}</a>
                 </li>
                 <li ng-click="addConversation()">
@@ -39,7 +39,7 @@
                 </li>
             </ul>
             <div class="tab-content">
-                <div ng-repeat="conversation in conversations" id="{{conversation.id}}" class="tab-pane">
+                <div ng-repeat="conversation in conversations" id="{{conversation.id}}" class="tab-pane {{isActive(conversation)}}">
                     <ul class="list-unstyled message-field">
                         <li ng-repeat="message in conversation.messages">{{message.name}} : {{message.text}}</li>
                     </ul>
