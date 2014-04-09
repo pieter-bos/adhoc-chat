@@ -75,7 +75,7 @@ chatApp.controller('conversationController', function($scope, $rootScope) {
 
     $scope.sendMessage = function() {
         if (this.conversation.message != '') {
-            socket.send({text: this.conversation.message});
+            socket.send({type: 'text', conversation: this.conversation.id, text: this.conversation.message});
             console.log(this.conversation.message);
             this.conversation.messages.push({name: 'you', text: this.conversation.message});
             this.conversation.message = "";
