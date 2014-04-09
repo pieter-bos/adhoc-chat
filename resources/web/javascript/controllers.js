@@ -49,7 +49,8 @@ chatApp.controller('userController', function ($scope, $rootScope) {
             } else {
                 nick = "";
             };
-    }});
+        }
+    });
 });
 
 chatApp.controller('conversationController', function($scope, $rootScope) {
