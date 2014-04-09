@@ -62,7 +62,7 @@ public class ClientHandler extends WebSocketServer {
      * Sends the text to all connected clients
      * @param text
      */
-    public void sendToAll(String text) {
+    private void sendToAll(String text) {
         Collection<WebSocket> con = connections();
         synchronized (con) {
             for (WebSocket c : con) {
