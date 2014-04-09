@@ -21,6 +21,7 @@ public class SocketImpl implements Socket {
     private static final TimeUnit SYN_TIMEOUT_UNIT = TimeUnit.MILLISECONDS;
     private static final String BROADCAST_DESTINATION = "192.168.1.0";
     private static final long RETRANSMIT_DELAY = 1500;
+    protected static final int MAX_RETRANSMITS = 5;
 
     private MulticastSocket mulSocket;
 
@@ -133,13 +134,8 @@ public class SocketImpl implements Socket {
         send(packet);
     }
 
-    private void awaitAck(RawPacket packet) {
-        new Timer().schedule(new TimerTask() {
-            @Override
-            public void run() {
-                
-            }
-        }, RETRANSMIT_DELAY);
+    protected void awaitAck(RawPacket packet) {
+        new Timer().schedule(new RetransmitRunnable(this, packet, network), RETRANSMIT_DELAY);
     }
 
     private HashMap<Integer, RawPacket> getUnAckedPackets(InetAddress destination) {
@@ -203,5 +199,9 @@ public class SocketImpl implements Socket {
         if (unAckedSendPackets.containsKey(sourceIp)) {
             unAckedSendPackets.get(sourceIp).remove(acknowledgmentNumber);
         }
+    }
+
+    public boolean isAcked(InetAddress destination, int sequenceNumber) {
+        return !getUnAckedPackets(destination).containsKey(sequenceNumber);
     }
 }

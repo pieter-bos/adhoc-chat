@@ -112,6 +112,10 @@ public class RawPacket {
         return acknowledgmentNumber;
     }
 
+    public int getRetransmissionNumber() {
+        return retransmissionNumber;
+    }
+
     public byte[] getSourceAddress() {
         return sourceAddress;
     }
@@ -176,5 +180,9 @@ public class RawPacket {
         } catch (InvalidPacketException e) { }
 
         return result;
+    }
+
+    public byte getFlags() {
+        return flags;
     }
 }
