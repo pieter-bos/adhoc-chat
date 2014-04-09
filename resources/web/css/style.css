@@ -1,6 +1,5 @@
 .container {
     padding: 15px;
-    overflow: hidden;
     text-overflow: ellipsis;
 }
 
@@ -22,12 +21,16 @@ body {
     height: 500px;
     overflow-y: scroll;
     padding: 15px;
-    background-image: url("../chat-background.gif");
+    /*background-image: url("../chat-background.gif");
     background-repeat: no-repeat;
-    background-position: right 15px bottom;
+    background-position: right 15px bottom;*/
 }
 
 #leave-conv {
     float:right;
     margin-right: 15px;
+}
+
+.dropdown-menu{
+    max-width: 600px;
 }
