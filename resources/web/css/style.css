@@ -7,10 +7,27 @@ a {
     cursor: pointer;
 }
 
-body {
-    background-image: url("../hamster.jpg");
-    background-repeat: no-repeat;
-    background-position: right bottom;
+html, body {
+    min-height: 100%;
+}
+
+@keyframes rotate {
+    from {
+        transform: rotate(0deg);
+    }
+
+    to {
+        transform: rotate(360deg);
+    }
+}
+
+#hamster {
+    position: fixed;
+    right: 8px;
+    bottom: 8px;
+    animation-duration: 1s;
+    animation-name: rotate;
+    animation-iteration-count: infinite;
 }
 
 #add-to-conv {

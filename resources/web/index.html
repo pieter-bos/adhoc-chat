@@ -6,14 +6,17 @@
     <link rel="stylesheet" href="css/bootstrap.css"/>
     <link rel="stylesheet" href="css/style.css"/>
 
-    <script src="javascript/angular.js"></script>
-    <script src="javascript/controllers.js"></script>
-
     <script src="javascript/jquery.js"></script>
     <script src="javascript/bootstrap.js"></script>
+    <script src="javascript/websocket-jsonrpc.js"></script>
+    <script src="javascript/angular.js"></script>
+
+    <script src="javascript/controllers.js"></script>
     <script src="javascript/fancy.js"></script>
 </head>
 <body>
+
+<img id="hamster" src="hamster.jpg">
 
 <div class="container">
     <div class="row">
@@ -41,7 +44,7 @@
             <div class="tab-content">
                 <div ng-repeat="conversation in conversations" id="{{conversation.id}}" class="tab-pane {{isActive(conversation)}}">
                     <ul class="list-unstyled message-field">
-                        <li ng-repeat="message in conversation.messages">{{message.name}} : {{message.text}}</li>
+                        <li ng-repeat="message in conversation.messages">{{message.name}}: {{message.text}}</li>
                     </ul>
 
                     <form ng-submit="sendMessage()" class="form-inline" role="form">

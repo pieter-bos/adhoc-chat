@@ -1,21 +1,23 @@
 var chatApp = angular.module('chatApp', []);
 var socket = new WebSocket('ws://localhost:8081/');
 
-var emoticons = [{code: "(o^.^o)", link: "chat-emoticons/emoticon-1.gif"},
-                {code: "(=@=)", link: "chat-emoticons/emoticon-2.gif"},
-                {code: "(^o^)", link: "chat-emoticons/emoticon-3.gif"},
-                {code: "(\\-.-)", link: "chat-emoticons/emoticon-4.gif"},
-                {code: "(nod)", link: "chat-emoticons/emoticon-5.gif"},
-                {code: "(\\^.^/)", link: "chat-emoticons/emoticon-6.gif"},
-                {code: "(-.-)", link: "chat-emoticons/emoticon-7.gif"},
-                {code: "(^o^\\)", link: "chat-emoticons/emoticon-8.gif"},
-                {code: "(O.)", link: "chat-emoticons/emoticon-9.gif"},
-                {code: "(o^o)", link: "chat-emoticons/emoticon-10.gif"},
-                {code: "(\\,/)", link: "chat-emoticons/emoticon-11.gif"},
-                {code: "(=_=)", link: "chat-emoticons/emoticon-12.gif"},
-                {code: "(^.^)", link: "chat-emoticons/emoticon-13.gif"},
-                {code: "(T0T)", link: "chat-emoticons/emoticon-14.gif"},
-                {code: "(\\^o^)", link: "chat-emoticons/emoticon-15.gif"}];
+const EMOTICONS = [
+    { code: "(o^.^o)", link: "chat-emoticons/emoticon-1.gif" },
+    { code: "(=@=)", link: "chat-emoticons/emoticon-2.gif" },
+    { code: "(^o^)", link: "chat-emoticons/emoticon-3.gif" },
+    { code: "(\\-.-)", link: "chat-emoticons/emoticon-4.gif" },
+    { code: "(nod)", link: "chat-emoticons/emoticon-5.gif" },
+    { code: "(\\^.^/)", link: "chat-emoticons/emoticon-6.gif" },
+    { code: "(-.-)", link: "chat-emoticons/emoticon-7.gif" },
+    { code: "(^o^\\)", link: "chat-emoticons/emoticon-8.gif" },
+    { code: "(O.)", link: "chat-emoticons/emoticon-9.gif" },
+    { code: "(o^o)", link: "chat-emoticons/emoticon-10.gif" },
+    { code: "(\\,/)", link: "chat-emoticons/emoticon-11.gif" },
+    { code: "(=_=)", link: "chat-emoticons/emoticon-12.gif" },
+    { code: "(^.^)", link: "chat-emoticons/emoticon-13.gif" },
+    { code: "(T0T)", link: "chat-emoticons/emoticon-14.gif" },
+    { code: "(\\^o^)", link: "chat-emoticons/emoticon-15.gif "}
+];
 
 socket.onmessage = function(message) {
     var data = JSON.parse(message.data);

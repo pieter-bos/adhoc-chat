@@ -1,6 +1,4 @@
-$.ready(function() {
-    var nick = prompt("Please enter your name that you'd like to use for the chat.");
-    if (nick != null) {
-        $scope.nick = nick;
-    }
-})
+var rpc = new WebSocketJSONRPC('ws://localhost:8001/');
+rpc.call('test', 1, 2, 3, function(result) {
+
+});
