@@ -148,7 +148,9 @@ public class SocketImpl implements Socket {
 
     @Override
     public void broadcast(byte[] data) {
-
+        for(InetAddress address : network) {
+            send(data, address);
+        }
     }
 
     @Override
