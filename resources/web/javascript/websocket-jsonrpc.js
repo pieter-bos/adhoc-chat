@@ -7,25 +7,25 @@ function WebSocketJSONRPC(url) {
 
     this._id = 0;
 
-    this.socket.onmessage = function(e) {
+    this.socket.onmessage = (function(e) {
         var data = JSON.parse(e.data);
 
         console.log(data);
-    }
+    }).bind(this);
 
-    this.socket.onerror = function(e) {
-        this.emit('error', e.message);
-    }
+    this.socket.onerror = (function(e) {
+        this.emit('error', 'An error occurred on the WebSocket layer');
+    }).bind(this);
 
-    this.socket.onopen = function(e) {
+    this.socket.onopen = (function(e) {
         this.open = true;
         this.emit('open');
-    }
+    }).bind(this);
 
-    this.socket.onclose = function(e) {
+    this.socket.onclose = (function(e) {
         this.open = false;
         this.emit('close');
-    }
+    }).bind(this);
 
     this.on = function(event, callback) {
         if(event in this.events) {

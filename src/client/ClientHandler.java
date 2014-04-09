@@ -41,6 +41,8 @@ public class ClientHandler extends WebSocketServer {
     public void onMessage(WebSocket webSocket, String s) {
         //Build byte message
 
+        System.out.println(s);
+
         // Send to "de netwerk"
 
     }
