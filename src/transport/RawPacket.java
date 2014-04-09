@@ -164,10 +164,11 @@ public class RawPacket {
 
     @Override
     public int hashCode() {
-        ByteBuffer buffer = ByteBuffer.allocate(12);
+        ByteBuffer buffer = ByteBuffer.allocate(16);
         buffer.putInt(sequenceNumber);
         buffer.putInt(retransmissionNumber);
         buffer.put(sourceAddress);
+        buffer.put(destinationAddress);
         buffer.reset();
         return buffer.hashCode();
     }
