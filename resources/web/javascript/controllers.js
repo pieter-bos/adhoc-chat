@@ -104,9 +104,6 @@ chatApp.controller('conversationController', function($scope, $rootScope) {
     }
 
     $scope.leaveConversation = function() {
-        //Verwijder current persoon uit gesprek
-
-        //Sluit tab met het gesprek
         var conv = $scope.conversations.indexOf(this.conversation);
         $scope.conversations.splice(conv, conv+1);
         $scope.active = $scope.conversations[0];
