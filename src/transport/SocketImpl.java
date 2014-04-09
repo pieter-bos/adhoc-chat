@@ -1,15 +1,25 @@
 package transport;
 
+import exceptions.InvalidPacketException;
+
 import java.io.IOException;
 import java.net.DatagramPacket;
 import java.net.InetAddress;
 import java.net.MulticastSocket;
+import java.net.UnknownHostException;
 import java.security.SecureRandom;
 import java.util.*;
 import java.util.concurrent.LinkedBlockingQueue;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.locks.Condition;
+import java.util.concurrent.locks.ReentrantLock;
 
 public class SocketImpl implements Socket {
     private static final String GROUP = "224.224.224.224";
+    private static final int MAX_TRIES = 3;
+    private static final long SYN_TIMEOUT = 2000;
+    private static final TimeUnit SYN_TIMEOUT_UNIT = TimeUnit.MILLISECONDS;
+    private static final String BROADCAST_DESTINATION = "192.168.1.0";
 
     private MulticastSocket mulSocket;
 
@@ -29,8 +39,6 @@ public class SocketImpl implements Socket {
 
     // Destination, (SequenceNumber, Packet)
     private HashMap<InetAddress, HashMap<Integer, Packet>> unAckedSendPackets = new HashMap<>();
-
-    private Random random = new SecureRandom();
 
     public SocketImpl(int port) throws IOException {
         this.port = port;
@@ -60,7 +68,36 @@ public class SocketImpl implements Socket {
     }
 
     private void syn() {
+        HashSet<InetAddress> candidates = (HashSet<InetAddress>) network.clone();
+        HashSet<InetAddress> verified = new HashSet<>();
 
+        int tries = 0;
+
+        ReentrantLock lock = new ReentrantLock();
+        Condition condition = lock.newCondition();
+
+        while(tries < MAX_TRIES && (!candidates.equals(verified) || verified.size() == 0)) {
+            SynAckHandler handler = new SynAckHandler(lock, condition, candidates, verified, this);
+
+            lock.lock();
+            receiverThread.addPacketListener(handler);
+
+
+            try {
+                send(new RawPacket(RawPacket.SYN_MASK, 0, 0, tries, getAddress(), InetAddress.getByName(BROADCAST_DESTINATION)));
+            } catch (InvalidPacketException | UnknownHostException e) {  }
+
+            try {
+                condition.await(SYN_TIMEOUT, SYN_TIMEOUT_UNIT);
+            } catch (InterruptedException e) {  }
+
+            receiverThread.removePacketListener(handler);
+            lock.unlock();
+
+            tries++;
+        }
+
+        network = (HashSet<InetAddress>) verified.clone();
     }
 
     protected synchronized void send(RawPacket packet) {
@@ -94,12 +131,6 @@ public class SocketImpl implements Socket {
             return packetQueue.take();
         } catch (InterruptedException e) {
             return null;
-        }
-    }
-
-    public int randInt() {
-        synchronized (random) {
-            return random.nextInt(1000000);
         }
     }
 
