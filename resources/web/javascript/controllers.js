@@ -79,6 +79,7 @@ chatApp.controller('conversationController', function($scope, $rootScope) {
             console.log(this.conversation.message);
             this.conversation.messages.push({name: 'you', text: this.conversation.message});
             this.conversation.message = "";
+            $(".message-field").animate({scrollTop: $(document).height()+999999}, "slow");
         }
     }
 
