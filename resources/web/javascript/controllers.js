@@ -17,6 +17,20 @@ var emoticons = [{code: "(o^.^o)", link: "../chat-emoticons/emoticon-1.gif"},
                 {code: "(T0T)", link: "../chat-emoticons/emoticon-14.gif"},
                 {code: "(\\^o^)", link: "../chat-emoticons/emoticon-15.gif"}];
 
+socket.onmessage = function(message) {
+    var data = JSON.parse(message.data);
+    console.log(data);
+
+    switch(data.type) {
+        case 'invite':
+            handleInvite(data.source, data.conversation, data.members);
+    }
+}
+
+function handleInvite(source, conversation, members) {
+    
+}
+
 function Conversation() {
     this.id = Math.floor((Math.random()*100000)+1);
     this.members = [];
