@@ -93,5 +93,6 @@ chatApp.controller('conversationController', function($scope, $rootScope) {
         var conv = $scope.conversations.indexOf(this.conversation);
         $scope.conversations.splice(conv, conv+1);
         $scope.active = $scope.conversations[0];
+        socket.send({type: "leave", conversation: this.conversation.id});
     }
 });
