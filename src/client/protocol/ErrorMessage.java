@@ -1,7 +1,5 @@
 package client.protocol;
 
-import com.google.gson.Gson;
-
 /**
  * Error message for web interface
  */
