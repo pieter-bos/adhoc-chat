@@ -69,6 +69,7 @@ public class SocketImpl implements Socket {
         connected = true;
     }
 
+    @SuppressWarnings("unchecked") // ignore unchecked casts after clone().
     private void syn() {
         HashSet<InetAddress> candidates = (HashSet<InetAddress>) network.clone();
         HashSet<InetAddress> verified = new HashSet<>();
