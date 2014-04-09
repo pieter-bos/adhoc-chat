@@ -20,6 +20,7 @@ public class SocketImpl implements Socket {
     private static final long SYN_TIMEOUT = 2000;
     private static final TimeUnit SYN_TIMEOUT_UNIT = TimeUnit.MILLISECONDS;
     private static final String BROADCAST_DESTINATION = "192.168.1.0";
+    private static final long RETRANSMIT_DELAY = 1500;
 
     private MulticastSocket mulSocket;
 
@@ -34,11 +35,11 @@ public class SocketImpl implements Socket {
 
     private HashSet<InetAddress> network = new HashSet<>();
 
-    private HashMap<InetAddress, Integer> sendLastSequenceNumbers = new HashMap<>();
-    private HashMap<InetAddress, Integer> receivedLastSequenceNumbers = new HashMap<>();
+    private final HashMap<InetAddress, Integer> sendLastSequenceNumbers = new HashMap<>();
+    private final HashMap<InetAddress, Integer> receivedLastSequenceNumbers = new HashMap<>();
 
     // Destination, (SequenceNumber, Packet)
-    private HashMap<InetAddress, HashMap<Integer, Packet>> unAckedSendPackets = new HashMap<>();
+    private HashMap<InetAddress, HashMap<Integer, RawPacket>> unAckedSendPackets = new HashMap<>();
 
     public SocketImpl(int port) throws IOException {
         this.port = port;
@@ -117,7 +118,36 @@ public class SocketImpl implements Socket {
 
     @Override
     public void send(byte[] data, InetAddress destination) {
+        int seq = -1;
+        RawPacket packet = null;
 
+        try {
+            seq = getSequenceNumber(destination);
+            packet = new RawPacket((byte) 0, seq, 0, 0, getAddress(), destination, data);
+        } catch (InvalidPacketException e) {  }
+
+        getUnAckedPackets(destination).put(seq, packet);
+
+        awaitAck(packet);
+
+        send(packet);
+    }
+
+    private void awaitAck(RawPacket packet) {
+        new Timer().schedule(new TimerTask() {
+            @Override
+            public void run() {
+                
+            }
+        }, RETRANSMIT_DELAY);
+    }
+
+    private HashMap<Integer, RawPacket> getUnAckedPackets(InetAddress destination) {
+        if(unAckedSendPackets.get(destination) == null) {
+            unAckedSendPackets.put(destination, new HashMap<Integer, RawPacket>());
+        }
+
+        return unAckedSendPackets.get(destination);
     }
 
     @Override
