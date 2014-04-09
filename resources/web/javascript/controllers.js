@@ -60,12 +60,13 @@ chatApp.controller('conversationController', function($scope, $rootScope) {
     $scope.active = $scope.conversations[0];
 
     $scope.addConversation = function() {
-        $scope.conversations.push(new Conversation());
+        var conv = new Conversation();
+        $scope.active = conv;
+        $scope.conversations.push(conv);
     }
 
     $scope.setActive = function() {
         $scope.active = this.conversation;
-        console.log($scope.active.id);
     }
 
     $rootScope.$on('addMember', function(e, user) {
@@ -80,6 +81,11 @@ chatApp.controller('conversationController', function($scope, $rootScope) {
             this.conversation.messages.push({name: 'you', text: this.conversation.message});
             this.conversation.message = "";
         }
+    }
+
+    $scope.isActive = function(conversation) {
+        console.log(conversation.id + ': ' + ($scope.active == conversation));
+        return $scope.active == conversation ? 'active' : '';
     }
 
     $scope.leaveConversation = function() {
