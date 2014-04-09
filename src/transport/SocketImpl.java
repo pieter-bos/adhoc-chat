@@ -36,7 +36,15 @@ public class SocketImpl implements Socket {
 
     private HashSet<InetAddress> network = new HashSet<>();
 
+    /**
+     * The last sequence number just to send a packet with to the destination.
+     */
     private final HashMap<InetAddress, Integer> sendLastSequenceNumbers = new HashMap<>();
+
+    /**
+     * The sequence number of the last packet, from the source, put in the packetQueue.
+     * All packets with a lower sequence number have already been received.
+     */
     private final HashMap<InetAddress, Integer> receivedLastSequenceNumbers = new HashMap<>();
 
     // Destination, (SequenceNumber, Packet)
@@ -190,10 +198,10 @@ public class SocketImpl implements Socket {
         return receivedLastSequenceNumbers.get(sourceIp);
     }
 
-    public int getSequenceNumber(InetAddress sourceIp) {
+    public int getSequenceNumber(InetAddress destinationIp) {
         synchronized (sendLastSequenceNumbers) {
-            int result = sendLastSequenceNumbers.get(sourceIp);
-            sendLastSequenceNumbers.put(sourceIp, result + 1);
+            int result = sendLastSequenceNumbers.get(destinationIp);
+            sendLastSequenceNumbers.put(destinationIp, result + 1);
             return result;
         }
     }
