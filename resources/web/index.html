@@ -21,7 +21,7 @@
     <div class="row">
         <div class="col-md-4" ng-controller="userController">
             <div class="well">
-                <h1>{{nick}}</h1>
+                <h4>Welcome: {{ nick }}</h4>
             </div>
             <div class="well">
                 <ul class="nav nav-pills nav-stacked">
@@ -34,7 +34,7 @@
                 </ul>
             </div>
         </div>
-        <div ng-controller="conversationController" class="col-md-8">
+        <div ng-controller="conversationController" class="col-md-8 well">
             <ul class="nav nav-tabs">
                 <li ng-repeat="conversation in conversations" ng-click="setActive()" class="{{isActive(conversation)}}">
                     <a href="#{{conversation.id}}" data-toggle="tab">{{conversation.title()}}</a>

@@ -48,3 +48,8 @@ html, body {
 .dropdown-menu{
     max-width: 600px;
 }
+
+.tab-pane {
+    padding: 15px;
+    background-color: white;
+}
