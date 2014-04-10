@@ -62,17 +62,17 @@ public class ClientHandler implements WebSocketJsonRpcHandler {
 
     @Override
     public void onOpen(WebSocket webSocket, ClientHandshake clientHandshake) {
-
+    //TODO implement
     }
 
     @Override
     public void onClose(WebSocket webSocket, int i, String s, boolean b) {
-
+    //TODO implement
     }
 
     @Override
     public void onError(WebSocket webSocket, Exception e) {
-
+    //TODO implement
     }
 
     /**
