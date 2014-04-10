@@ -1,6 +1,11 @@
-$.ready(function() {
-    var nick = prompt("Please enter your name that you'd like to use for the chat.");
-    if (nick != null) {
-        $scope.nick = nick;
-    }
-})
+var rpc = new WebSocketJSONRPC('ws://localhost:8081/');
+
+rpc.on('error', function(err) {
+    console.log('Error:', err);
+});
+
+rpc.on('open', function() {
+    rpc.call('test', 1, 2, 3, function(result) {
+        console.log(result);
+    });
+});

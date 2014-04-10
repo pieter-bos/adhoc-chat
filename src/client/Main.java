@@ -1,5 +1,7 @@
 package client;
 
+import client.wsjsonrpc.WebSocketJsonRpc;
+
 import java.net.InetSocketAddress;
 
 /**
@@ -14,10 +16,13 @@ public class Main {
      * Constructor
      */
     public Main() {
-        server = new SimpleServer(8080);
+//        server = new SimpleServer(8080);
 
-        client = new ClientHandler(new InetSocketAddress(8081), network);
-        client.start();
+//        client = new ClientHandler(new InetSocketAddress(8081), network);
+//        client.start();
+
+        WebSocketJsonRpc<TestHandler> rpc = new WebSocketJsonRpc<>(new InetSocketAddress(8081), new TestHandler(), TestHandler.class);
+        rpc.start();
 
         network = new NetworkHandler(5000, client);
         network.start();
