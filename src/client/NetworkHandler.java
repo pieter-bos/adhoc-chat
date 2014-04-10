@@ -16,7 +16,7 @@ public class NetworkHandler extends Thread {
     private ClientHandler client;
     private Socket socket;
     private boolean listening = true;
-    private HashMap<String, InetAddress> nameAddressMap;
+    public HashMap<String, InetAddress> nameAddressMap;
 
     /**
      * Constructor of NetworkHandler
@@ -34,54 +34,19 @@ public class NetworkHandler extends Thread {
     }
 
     /**
-     * Sends a message to the destination that this person has left the conversation
-     * @param conversation ID of the conversation
-     * @param destination Name of the receiver
+     * Wrapper for send method of socket
+     * @param data Data array
+     * @param dest Destination address
      */
-    public void sendLeaveMessage(int conversation, String destination) {
-        socket.send(serialize(new LeaveMessage(conversation)), nameAddressMap.get(destination));
+    public void send(byte[] data, InetAddress dest) {
+        socket.send(data, dest);
     }
 
     /**
-     * Broadcasts the new nickname of this client over the network
-     * @param nick Nickname of the client
+     * Wrapper for broadcast method of socket
+     * @param data Data array
      */
-    public void broadcastNickChange(String nick) {
-        socket.broadcast(serialize(new NickChangeMessange(nick)));
-    }
-
-    /**
-     * Sends a text message to the destination
-     * @param conversation
-     * @param message
-     */
-    public void sendTextMessage(int conversation, String message, String destination) {
-        socket.send(serialize(new TextMessage(conversation, message)), nameAddressMap.get(destination));
-    }
-
-    /**
-     * Sends an invite for a conversation to the destination
-     * @param conversation ID of the conversation
-     * @param destination Name of the receiver
-     */
-    public void sendInviteMessage(int conversation, String destination) {
-        socket.send(serialize(new InviteMessage(conversation, null)), nameAddressMap.get(destination));
-    }
-
-    /**
-     * Serializes a message to a byte array
-     * @param message Message
-     * @return Byte array
-     */
-    private byte[] serialize(Message message) {
-        try {
-            ByteArrayOutputStream bos = new ByteArrayOutputStream();
-            ObjectOutputStream out = new ObjectOutputStream(bos);
-            out.writeObject(message);
-            return bos.toByteArray();
-        } catch (IOException e) {
-            e.printStackTrace();
-            return new byte[]{};
-        }
+    public void broadcast(byte[] data) {
+        socket.broadcast(data);
     }
 }
