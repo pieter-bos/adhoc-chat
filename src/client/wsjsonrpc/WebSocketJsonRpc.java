@@ -5,6 +5,9 @@ import org.java_websocket.WebSocket;
 import org.java_websocket.handshake.ClientHandshake;
 import org.java_websocket.server.WebSocketServer;
 
+import java.lang.annotation.Annotation;
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
 import java.net.InetSocketAddress;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -38,8 +41,81 @@ public class WebSocketJsonRpc<T extends WebSocketJsonRpcHandler> extends WebSock
         handler.onClose(webSocket, i, s, b);
     }
 
+    private JsonRpcResponse call(String id, String methodName, JsonArray params) {
+        Method[] methods = methodClass.getMethods();
+
+        for(Method method : methods) {
+            if(method.getName().equals(methodName)) {
+                System.out.println(method.getName() + ":");
+
+                Annotation[] annotations = method.getDeclaredAnnotations();
+
+
+                boolean found = false;
+
+                for(Annotation annotation : annotations) {
+                    System.out.println(" -> " + annotation.getClass().getName());
+
+                    if(annotation instanceof Expose) {
+                        found = true;
+                    }
+                }
+
+                if(found) {
+
+                    if(method.getParameterTypes().length != params.size()) {
+                        return new JsonRpcError(id, JSONRPC_INVALID_PARAMS, "Invalid parameter array length");
+                    }
+
+                    Object[] callParams = new Object[params.size()];
+                    Class[] classes = method.getParameterTypes();
+
+                    for(int i = 0; i < params.size(); i++) {
+                        if(classes[i] == String.class) {
+                            callParams[i] = params.get(i).getAsString();
+                        } else if(classes[i] == int.class) {
+                            callParams[i] = params.get(i).getAsInt();
+                        } else {
+                            return new JsonRpcError(id, JSONRPC_INVALID_PARAMS, "Unknown parameter type: " + classes[i].getName());
+                        }
+                    }
+
+                    try {
+                        return new JsonRpcResult(id, method.invoke(handler, callParams));
+                    } catch (IllegalAccessException e) {
+                        return new JsonRpcError(id, JSONRPC_INTERNAL_ERROR, "Internal Error: IllegalAccessException");
+                    } catch (InvocationTargetException e) {
+                        return new JsonRpcError(id, JSONRPC_INTERNAL_ERROR, "Internal Error: InvocationTargetException");
+                    }
+                }
+            }
+        }
+
+        return new JsonRpcError(id, JSONRPC_METHOD_NOT_FOUND, "The specified method was not found.");
+    }
+
     private JsonRpcResponse getResponse(JsonObject object) {
-        
+        if(object.has("id") && object.has("jsonrpc") && object.has("method") && object.has("params")) {
+            try {
+                String id = object.get("id").getAsString();
+                String version = object.get("jsonrpc").getAsString();
+                String method = object.get("method").getAsString();
+                JsonArray params = object.get("params").getAsJsonArray();
+
+                if(!version.equals("2.0")) {
+                    return new JsonRpcError(id, JSONRPC_INVALID_REQUEST, "Wrong jsonrpc version.");
+                }
+
+                return call(id, method, params);
+            } catch(UnsupportedOperationException e) {
+                return new JsonRpcError(null, JSONRPC_INVALID_REQUEST, "Request has wrong parameter types.");
+            } finally {
+
+            }
+
+        } else {
+            return new JsonRpcError(null, JSONRPC_INVALID_REQUEST, "Request is missing parameters.");
+        }
     }
 
     @Override

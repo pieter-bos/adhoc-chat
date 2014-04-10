@@ -1,7 +1,8 @@
 package client.wsjsonrpc;
 
-/**
- * Created by pieter on 4/10/14.
- */
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
+
+@Retention(RetentionPolicy.RUNTIME)
 public @interface Expose {
 }

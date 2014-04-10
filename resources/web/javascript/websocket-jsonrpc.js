@@ -10,7 +10,11 @@ function WebSocketJSONRPC(url) {
     this.socket.onmessage = (function(e) {
         var data = JSON.parse(e.data);
 
-        console.log(data);
+        if(data.error !== undefined) {
+            this.emit('error', data.error);
+        } else {
+            this.callbacks[data.id](data.result);
+        }
     }).bind(this);
 
     this.socket.onerror = (function(e) {
