@@ -77,5 +77,7 @@ function WebSocketJSONRPC(url) {
             args.unshift(func);
             this.call.apply(this, args);
         }).bind(this);
+
+        return this;
     }
 }
