@@ -7,29 +7,6 @@ a {
     cursor: pointer;
 }
 
-html, body {
-    min-height: 100%;
-}
-
-@keyframes rotate {
-    from {
-        transform: rotate(0deg);
-    }
-
-    to {;
-        transform: rotate(360deg);
-    }
-}
-
-#hamster {
-    position: fixed;
-    right: 8px;
-    bottom: 8px;
-    animation-duration: 1.0s;
-    animation-name: rotate;
-    animation-iteration-count: infinite;
-}
-
 #add-to-conv {
     float: right;
 }
