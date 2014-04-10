@@ -76,6 +76,12 @@ public class SocketImpl implements Socket {
 
         receiverThread = new ReceiverThread(mulSocket);
 
+        receiverThread.addPacketListener(new PacketListener() {
+            @Override
+            public void onPacketReceived(RawPacket packet) {
+                System.out.println("recv " + packet);
+            }
+        });
         receiverThread.addPacketListener(new SynHandler(this, network));
         receiverThread.addPacketListener(new BroadcastHandler(this));
         receiverThread.addPacketListener(new LocalHandler(this, packetQueue));
@@ -153,6 +159,7 @@ public class SocketImpl implements Socket {
      * @param packet the <code>RawPacket</code> to send.
      */
     protected synchronized void send(RawPacket packet) {
+        System.out.println("send " + packet);
         DatagramPacket datagram = new DatagramPacket(packet.getBytes(), packet.getLength(), group, port);
 
         try {

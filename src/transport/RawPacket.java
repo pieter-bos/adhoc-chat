@@ -186,4 +186,21 @@ public class RawPacket {
     public byte getFlags() {
         return flags;
     }
+
+    @Override
+    public String toString() {
+        String result = "";
+
+        result += isSyn() ? "SYN" : "";
+        result += isAck() ? "ACK" : "";
+
+        result += (!result.equals("")) ? ": " : "";
+
+        result += "seq=" + getSequenceNumber();
+        result += ", ack=" + getAcknowledgmentNumber();
+        result += ", rtns=" + getRetransmissionNumber();
+        result += ", len=" + data.length;
+
+        return result;
+    }
 }
