@@ -34,18 +34,12 @@ function Conversation() {
 
     this.addMember = function(user) {
         this.members.push(user);
-        console.log(this.id);
-        console.log(this.members);
     }
 }
 
 chatApp.controller("userController", function ($scope, $rootScope, websocketService) {
     $scope.nick = "";
-
-    $scope.users = [
-        {name: "Laurens"},
-        {name: "Sophie"}
-    ];
+    $scope.users = [];
 
     $scope.addToConversation = function() {
         $rootScope.$emit("addMember", this.user);
@@ -68,6 +62,7 @@ chatApp.controller("conversationController", function($scope, $rootScope, websoc
     $scope.conversations = [
         new Conversation()
     ];
+
     $scope.active = $scope.conversations[0];
 
     $scope.addConversation = function() {
@@ -82,7 +77,7 @@ chatApp.controller("conversationController", function($scope, $rootScope, websoc
 
     $rootScope.$on("addMember", function(e, user) {
         $scope.active.addMember(user);
-        socket.send({conversation: $scope.active.id, member: user.name});
+        websocketService.invite($scope.active.id, user);
     });
 
     $scope.sendMessage = function() {
@@ -90,6 +85,10 @@ chatApp.controller("conversationController", function($scope, $rootScope, websoc
             this.conversation.messages.push({name: "you", text: this.conversation.message});
             this.conversation.message = "";
             $(".tab-pane").animate({scrollTop: $(".tab-pane").height()+999999}, "slow");
+
+            for (member in this.conversation.members) {
+                websocketService.send(this.conversation.id, this.conversation.message, member);
+            }
         }
     }
 
