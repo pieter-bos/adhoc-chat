@@ -23,9 +23,6 @@ public class NetworkHandler extends Thread {
 
     @Override
     public void run() {
-        while (this.listening) {
-            // Handel berichten af
-        }
     }
 
     /**
