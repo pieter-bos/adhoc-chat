@@ -12,7 +12,6 @@
     <script src="javascript/angular.js"></script>
 
     <script src="javascript/controllers.js"></script>
-    <script src="javascript/fancy.js"></script>
 </head>
 <body>
 
@@ -21,6 +20,9 @@
 <div class="container">
     <div class="row">
         <div class="col-md-4" ng-controller="userController">
+            <div class="well">
+                <h1>{{nick}}</h1>
+            </div>
             <div class="well">
                 <ul class="nav nav-pills nav-stacked">
                     <li ng-repeat="user in users">

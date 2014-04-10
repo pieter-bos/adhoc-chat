@@ -1,11 +1,9 @@
 package client;
 
-import client.protocol.*;
 import transport.Socket;
+import transport.SocketImpl;
 
-import java.io.ByteArrayOutputStream;
 import java.io.IOException;
-import java.io.ObjectOutputStream;
 import java.net.InetAddress;
 import java.util.HashMap;
 
@@ -26,6 +24,12 @@ public class NetworkHandler extends Thread {
     public NetworkHandler(int port, ClientHandler client){
         this.client = client;
         this.nameAddressMap = new HashMap<>();
+        try {
+            this.socket = new SocketImpl(port);
+            socket.connect();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
     }
 
     @Override

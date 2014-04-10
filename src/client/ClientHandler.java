@@ -27,9 +27,10 @@ public class ClientHandler implements WebSocketJsonRpcHandler {
 
     @Expose
     public boolean nick(String nick) {
+        System.out.println("iets");
         this.nick = nick;
-        System.out.println(nick);
-        networkHandler.broadcast(serialize(new NickChangeMessange(nick)));
+        networkHandler.broadcast(serialize(new NickChangeMessange(this.nick)));
+        System.out.println("iets");
         return true;
     }
 
