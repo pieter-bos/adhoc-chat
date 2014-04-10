@@ -103,7 +103,7 @@ chatApp.controller("conversationController", function($scope, $rootScope, websoc
             websocketService.leave(conv.id, member, function(result) { console.log(result); });
         }
 
-        $scope.conversations.splice(conv, conv+1);
+        $scope.conversations.splice(conv, 1);
         $scope.active = $scope.conversations[0];
     }
 });
