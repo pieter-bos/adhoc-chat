@@ -1,75 +1,63 @@
 package client;
 
-import client.protocol.Message;
+import client.wsjsonrpc.Expose;
+import client.wsjsonrpc.WebSocketJsonRpcHandler;
 import org.java_websocket.WebSocket;
 import org.java_websocket.handshake.ClientHandshake;
-import org.java_websocket.server.WebSocketServer;
-
-import java.net.InetSocketAddress;
-import java.util.Collection;
 
 /**
  * ClientHandler handles traffic between the browser and between the client.
  */
-public class ClientHandler extends WebSocketServer {
+public class ClientHandler implements WebSocketJsonRpcHandler {
     private NetworkHandler networkHandler;
+    private String nick = null;
 
     /**
      * Constructor
-     *
-     * @param address
      * @param networkHandler
      */
-    public ClientHandler(InetSocketAddress address, NetworkHandler networkHandler) {
-        super(address);
+    public ClientHandler(NetworkHandler networkHandler) {
         this.networkHandler = networkHandler;
+    }
+
+    @Expose
+    public boolean nick(String nick) {
+        this.nick = nick;
+        System.out.println(nick);
+        networkHandler.broadcastNickChange(nick);
+        return true;
+    }
+
+    @Expose boolean invite(int conversation, String destination) {
+        networkHandler.sendInviteMessage(conversation, destination);
+
+        return true;
+    }
+
+    @Expose
+    public boolean send(int conversation, String message, String destination) {
+        networkHandler.sendTextMessage(conversation, message, destination);
+        return true;
+    }
+
+    @Expose
+    public boolean leave(int conversation, String destination) {
+        networkHandler.sendLeaveMessage(conversation, destination);
+        return true;
     }
 
     @Override
     public void onOpen(WebSocket webSocket, ClientHandshake clientHandshake) {
-//        broadcast ("we zijn er");
 
     }
 
     @Override
     public void onClose(WebSocket webSocket, int i, String s, boolean b) {
-        // Broadcast ("we zijn er niet meer")
-
-    }
-
-    @Override
-    public void onMessage(WebSocket webSocket, String s) {
-        //Build byte message
-
-        System.out.println(s);
-
-        // Send to "de netwerk"
 
     }
 
     @Override
     public void onError(WebSocket webSocket, Exception e) {
-        // Broadcast ("we zijn er niet meer")
-    }
 
-    /**
-     * Writes the message to the webSocket
-     * @param message
-     */
-    public void write(Message message) {
-        sendToAll(message.toJSON());
-    }
-
-    /**
-     * Sends the text to all connected clients
-     * @param text
-     */
-    private void sendToAll(String text) {
-        Collection<WebSocket> con = connections();
-        synchronized (con) {
-            for (WebSocket c : con) {
-                c.send(text);
-            }
-        }
     }
 }

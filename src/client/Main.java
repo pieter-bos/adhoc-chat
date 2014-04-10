@@ -16,12 +16,7 @@ public class Main {
      * Constructor
      */
     public Main() {
-//        server = new SimpleServer(8080);
-
-//        client = new ClientHandler(new InetSocketAddress(8081), network);
-//        client.start();
-
-        WebSocketJsonRpc<TestHandler> rpc = new WebSocketJsonRpc<>(new InetSocketAddress(8081), new TestHandler(), TestHandler.class);
+        WebSocketJsonRpc<ClientHandler> rpc = new WebSocketJsonRpc<ClientHandler>(new InetSocketAddress(8081), new ClientHandler(network), ClientHandler.class);
         rpc.start();
 
         network = new NetworkHandler(5000, client);
