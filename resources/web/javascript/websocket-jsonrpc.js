@@ -70,4 +70,12 @@ function WebSocketJSONRPC(url) {
 
         return true;
     }
+
+    this.def = function(func) {
+        this[func] = (function() {
+            var args = Array.prototype.slice.call(arguments, 0, arguments.length);
+            args.unshift(func);
+            this.call.apply(this, args);
+        }).bind(this);
+    }
 }
