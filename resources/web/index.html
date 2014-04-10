@@ -27,7 +27,6 @@
                 <div class="modal-dialog">
                     <div class="modal-content">
                         <div class="modal-header">
-                            <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
                             <h4 class="modal-title" id="myModalLabel">Choose your nickname...</h4>
                         </div>
                         <div class="modal-body">
@@ -39,7 +38,8 @@
                 </div>
             </div>
             <div class="well" ng-click="showModal()">
-                <h4>Welcome: {{ nick }}</h4>
+                <h4>Your nickname (click to change):</h4>
+                <h3>{{ nick }}</h3>
             </div>
             <div class="well">
                 <ul class="nav nav-pills nav-stacked">
