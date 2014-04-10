@@ -1,4 +1,8 @@
-var chatApp = angular.module('chatApp', [new WebSocketJSONRPC("ws://localhost:8080/")]);
+var chatApp = angular.module("chatApp", []);
+
+chatApp.service("websocketService", function () {
+    return new WebSocketJSONRPC("ws://localhost:8081/").def("send").def("leave").def("invite").def("nick");
+});
 
 const EMOTICONS = [
     { code: "(o^.^o)", link: "chat-emoticons/emoticon-1.gif" },
@@ -35,8 +39,8 @@ function Conversation() {
     }
 }
 
-chatApp.controller('userController', function ($scope, $rootScope) {
-    $scope.nick = '';
+chatApp.controller("userController", function ($scope, $rootScope, websocketService) {
+    $scope.nick = "";
 
     $scope.users = [
         {name: "Laurens"},
@@ -44,8 +48,8 @@ chatApp.controller('userController', function ($scope, $rootScope) {
     ];
 
     $scope.addToConversation = function() {
-        $rootScope.$emit('addMember', this.user);
-        console.log('emit');
+        $rootScope.$emit("addMember", this.user);
+        console.log("emit");
     }
 
     angular.element(document).ready(function() {
@@ -62,6 +66,7 @@ chatApp.controller('userController', function ($scope, $rootScope) {
             }
             if (nick != ""  && nick != "you" && nick!="You" && nick!=null) {
                 $scope.nick = nick;
+                websocketService.nick(nick, function(e) { console.log(e); });
             } else {
                 nick = "";
             };
@@ -69,7 +74,7 @@ chatApp.controller('userController', function ($scope, $rootScope) {
     });
 });
 
-chatApp.controller('conversationController', function($scope, $rootScope) {
+chatApp.controller("conversationController", function($scope, $rootScope, websocketService) {
     $scope.conversations = [
         new Conversation()
     ];
@@ -85,29 +90,32 @@ chatApp.controller('conversationController', function($scope, $rootScope) {
         $scope.active = this.conversation;
     }
 
-    $rootScope.$on('addMember', function(e, user) {
+    $rootScope.$on("addMember", function(e, user) {
         $scope.active.addMember(user);
         socket.send({conversation: $scope.active.id, member: user.name});
     });
 
     $scope.sendMessage = function() {
-        if (this.conversation.message != '') {
-            socket.send({type: 'text', conversation: this.conversation.id, text: this.conversation.message});
+        if (this.conversation.message != "") {
+            socket.send({type: "text", conversation: this.conversation.id, text: this.conversation.message});
             console.log(this.conversation.message);
-            this.conversation.messages.push({name: 'you', text: this.conversation.message});
+            this.conversation.messages.push({name: "you", text: this.conversation.message});
             this.conversation.message = "";
             $(".message-field").animate({scrollTop: $(document).height()+999999}, "slow");
         }
     }
 
     $scope.isActive = function(conversation) {
-        return $scope.active == conversation ? 'active' : '';
+        return $scope.active == conversation ? "active" : "";
     }
 
     $scope.leaveConversation = function() {
         var conv = $scope.conversations.indexOf(this.conversation);
+        for (member in $scope.conversations[conv].members) {
+            websocketService.leave(conv.id, member, function(result) { console.log(result); });
+        }
+
         $scope.conversations.splice(conv, conv+1);
         $scope.active = $scope.conversations[0];
-        socket.send({type: "leave", conversation: this.conversation.id});
     }
 });
