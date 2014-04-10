@@ -1,9 +1,6 @@
 package client.wsjsonrpc;
 
-import com.google.gson.Gson;
-import com.google.gson.JsonElement;
-import com.google.gson.JsonObject;
-import com.google.gson.JsonParser;
+import com.google.gson.*;
 import org.java_websocket.WebSocket;
 import org.java_websocket.handshake.ClientHandshake;
 import org.java_websocket.server.WebSocketServer;
@@ -11,6 +8,7 @@ import org.java_websocket.server.WebSocketServer;
 import java.net.InetSocketAddress;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.LinkedList;
 
 public class WebSocketJsonRpc<T extends WebSocketJsonRpcHandler> extends WebSocketServer {
     public static final int JSONRPC_PARSE_ERROR = -32700;
@@ -40,15 +38,35 @@ public class WebSocketJsonRpc<T extends WebSocketJsonRpcHandler> extends WebSock
         handler.onClose(webSocket, i, s, b);
     }
 
-    private void sendError(WebSocket webSocket, JsonRpcError error) {
-        String data = new Gson().toJson(error);
-        webSocket.send(data);
+    private JsonRpcResponse getResponse(JsonObject object) {
+        
     }
 
     @Override
     public void onMessage(WebSocket webSocket, String s) {
-        JsonObject element = new JsonParser().parse(s).getAsJsonObject();
-        sendError(webSocket, new JsonRpcError(element.getAsJsonObject().get("id").getAsInt() + "", JSONRPC_METHOD_NOT_FOUND, "Method not found"));
+        JsonElement element = new JsonParser().parse(s);
+        Object response;
+
+        if(element.isJsonObject()) {
+            response = getResponse(element.getAsJsonObject());
+        } else if(element.isJsonArray()) {
+            LinkedList<JsonRpcResponse> responses = new LinkedList<>();
+
+            for(JsonElement call : element.getAsJsonArray()) {
+                if(call.isJsonObject()) {
+                    responses.add(getResponse(call.getAsJsonObject()));
+                } else {
+                    responses.add(new JsonRpcError(null, JSONRPC_INVALID_REQUEST, "Request is not an object."));
+                }
+            }
+
+            response = new JsonRpcResponse[responses.size()];
+            responses.toArray((JsonRpcResponse[]) response);
+        } else {
+            response = new JsonRpcError(null, JSONRPC_INVALID_REQUEST, "Root element is not an array or object.");
+        }
+
+        webSocket.send(new Gson().toJson(response));
     }
 
     @Override
