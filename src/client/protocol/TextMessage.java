@@ -3,8 +3,7 @@ package client.protocol;
 /**
  * Sends a text message to the other conversation members
  */
-public class TextMessage extends NetworkMessage {
-    private final String type = "text";
+public class TextMessage extends Message {
     private int conversation;
     private String message;
 
@@ -16,10 +15,5 @@ public class TextMessage extends NetworkMessage {
     public TextMessage(int conversation, String message) {
         this.conversation = conversation;
         this.message = message;
-    }
-
-    @Override
-    public byte[] toByteArray() {
-        return new byte[0];
     }
 }

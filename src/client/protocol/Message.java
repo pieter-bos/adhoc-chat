@@ -1,16 +1,9 @@
 package client.protocol;
 
-import com.google.gson.Gson;
+import java.io.Serializable;
 
 /**
- * Interface for messages
+ * Marker class for messages
  */
-public abstract class Message {
-    /**
-     * returns the JSON representation of the message
-     * @return message
-     */
-    public String toJSON() {
-        return new Gson().toJson(this);
-    }
+public abstract class Message implements Serializable {
 }
