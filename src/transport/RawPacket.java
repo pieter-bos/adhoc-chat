@@ -169,7 +169,7 @@ public class RawPacket {
         buffer.putInt(retransmissionNumber);
         buffer.put(sourceAddress);
         buffer.put(destinationAddress);
-        buffer.reset();
+        buffer.rewind();
         return buffer.hashCode();
     }
 
