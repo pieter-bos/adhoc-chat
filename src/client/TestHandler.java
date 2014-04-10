@@ -27,7 +27,7 @@ public class TestHandler implements WebSocketJsonRpcHandler {
     }
 
     @Expose
-    public int schitterend(int a, int b) {
-        return a * b;
+    public void arrayTest(String[] objects) {
+        System.out.println(objects[0]);
     }
 }
