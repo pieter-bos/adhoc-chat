@@ -46,16 +46,12 @@ public class WebSocketJsonRpc<T extends WebSocketJsonRpcHandler> extends WebSock
 
         for(Method method : methods) {
             if(method.getName().equals(methodName)) {
-                System.out.println(method.getName() + ":");
-
                 Annotation[] annotations = method.getDeclaredAnnotations();
 
 
                 boolean found = false;
 
                 for(Annotation annotation : annotations) {
-                    System.out.println(" -> " + annotation.getClass().getName());
-
                     if(annotation instanceof Expose) {
                         found = true;
                     }
@@ -75,6 +71,13 @@ public class WebSocketJsonRpc<T extends WebSocketJsonRpcHandler> extends WebSock
                             callParams[i] = params.get(i).getAsString();
                         } else if(classes[i] == int.class) {
                             callParams[i] = params.get(i).getAsInt();
+                        } else if(classes[i] == String[].class) {
+                            JsonArray array = params.get(i).getAsJsonArray();
+                            String[] result = new String[array.size()];
+                            for(int j = 0; j < result.length; j++) {
+                                result[j] = array.get(j).getAsString();
+                            }
+                            callParams[i] = result;
                         } else {
                             return new JsonRpcError(id, JSONRPC_INVALID_PARAMS, "Unknown parameter type: " + classes[i].getName());
                         }
