@@ -26,7 +26,7 @@ function Conversation() {
     this.id = Math.floor((Math.random()*100000)+1);
     this.members = [];
     this.message = "";
-    this.messages = [];
+    this.messages = [{name: "Welcome", text: "Don't be an asshole!"}];
 
     this.title = function() {
         return this.id;
@@ -99,7 +99,7 @@ chatApp.controller("conversationController", function($scope, $rootScope, websoc
         if (this.conversation.message != "") {
             this.conversation.messages.push({name: "you", text: this.conversation.message});
             this.conversation.message = "";
-            $(".message-field").animate({scrollTop: $(document).height()+999999}, "slow");
+            $(".tab-pane").animate({scrollTop: $(".tab-pane").height()+999999}, "slow");
         }
     }
 
