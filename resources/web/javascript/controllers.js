@@ -52,25 +52,15 @@ chatApp.controller("userController", function ($scope, $rootScope, websocketServ
         console.log("emit");
     }
 
+    $scope.showModal = function() {
+        $('#nick-modal').modal();
+    }
+
     angular.element(document).ready(function() {
-        var nick = "";
-        while (nick == "") {
-            nick = prompt("What would you like your chat name to be?");
-            var i=0;
-            while (i<$scope.users.length) {
-                if (nick == $scope.users[i].name){
-                    nick="";
-                    break;
-                }
-                i++;
-            }
-            if (nick != ""  && nick != "you" && nick!="You" && nick!=null) {
-                $scope.nick = nick;
-                websocketService.nick(nick, function(e) { console.log(e); });
-            } else {
-                nick = "";
-            };
-        }
+        $('#nick-modal').modal({ keyboard: false, backdrop: 'static' });
+        $('#nick-modal form').on('submit', function(event) {
+            $('#nick-modal').modal('hide');
+        });
     });
 });
 

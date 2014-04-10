@@ -23,7 +23,22 @@
     </h4>
     <div class="row">
         <div class="col-md-4" ng-controller="userController">
-            <div class="well">
+            <div class="modal fade" id="nick-modal" tabindex="-1" role="dialog" aria-hidden="true" aria-labelledby="nick-modal-label">
+                <div class="modal-dialog">
+                    <div class="modal-content">
+                        <div class="modal-header">
+                            <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+                            <h4 class="modal-title" id="myModalLabel">Choose your nickname...</h4>
+                        </div>
+                        <div class="modal-body">
+                            <form class="form-horizontal" role="form">
+                                <input type="text" ng-model="nick" class="form-control" placeholder="Press enter when you're done..."/>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="well" ng-click="showModal()">
                 <h4>Welcome: {{ nick }}</h4>
             </div>
             <div class="well">
