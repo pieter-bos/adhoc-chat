@@ -42,7 +42,9 @@ public class ClientAddressMapper {
      * @param address
      */
     public void put(String username, InetAddress address) {
+        usernameAddressMap.remove(username);
         usernameAddressMap.put(username, address);
+        addressUsernameMap.remove(address);
         addressUsernameMap.put(address, username);
     }
 
