@@ -53,6 +53,11 @@ public class NetworkHandler extends Thread {
         }
     }
 
+    /**
+     * Sends a text message to the web interface
+     * @param sourceAddress Source address of the package
+     * @param message Parsed message
+     */
     private void sendTextMessage(final InetAddress sourceAddress, final TextMessage message) {
         client.sendToClient("textMessage", new Object() {
             private String source = nameAddressMap.get(sourceAddress);
@@ -60,6 +65,11 @@ public class NetworkHandler extends Thread {
         });
     }
 
+    /**
+     * Updates the list of clients and sends the new nick to the web interface
+     * @param sourceAddress Source address of the package
+     * @param message Parsed message
+     */
     private void updateClientList(final InetAddress sourceAddress, final NickChangeMessange message) {
         nameAddressMap.put(message.getNick(), sourceAddress);
 
