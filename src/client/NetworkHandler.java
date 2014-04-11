@@ -1,9 +1,15 @@
 package client;
 
+import client.protocol.InviteMessage;
+import client.protocol.Message;
+import client.protocol.NickChangeMessange;
+import transport.Packet;
 import transport.Socket;
 import transport.SocketImpl;
 
+import java.io.ByteArrayInputStream;
 import java.io.IOException;
+import java.io.ObjectInputStream;
 import java.net.InetAddress;
 import java.util.HashMap;
 
@@ -34,7 +40,18 @@ public class NetworkHandler extends Thread {
 
     @Override
     public void run() {
-        //TODO implement
+        while (listening) {
+            Packet packet = socket.receive();
+            Message message = deserialize(packet.getData());
+
+            if (message instanceof NickChangeMessange) {
+                updateClientList(packet.getSourceAddress(), message);
+            }
+        }
+    }
+
+    private void updateClientList(InetAddress sourceAddress, Message message) {
+
     }
 
     /**
@@ -52,5 +69,22 @@ public class NetworkHandler extends Thread {
      */
     public void broadcast(byte[] data) {
         socket.broadcast(data);
+    }
+
+    /**
+     * Deserializes a message from a byte array
+     * @param data Input array
+     * @return Deserialized message
+     */
+    private Message deserialize(byte[] data) {
+        try {
+            ByteArrayInputStream bis = new ByteArrayInputStream(data);
+            ObjectInputStream in = new ObjectInputStream(bis);
+            Message message = (Message) in.readObject();
+            return message;
+        } catch (IOException | ClassNotFoundException e) {
+            e.printStackTrace();
+            return null;
+        }
     }
 }

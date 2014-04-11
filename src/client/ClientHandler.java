@@ -34,7 +34,8 @@ public class ClientHandler implements WebSocketJsonRpcHandler {
         return true;
     }
 
-    @Expose boolean invite(int conversation, String destination) {
+    @Expose
+    public boolean invite(int conversation, String destination) {
         networkHandler.send(
                 serialize(new InviteMessage(conversation, null)),
                 networkHandler.nameAddressMap.get(destination)
@@ -58,6 +59,10 @@ public class ClientHandler implements WebSocketJsonRpcHandler {
                 networkHandler.nameAddressMap.get(destination)
         );
         return true;
+    }
+
+    public void sendToClient(Message message) {
+
     }
 
     @Override
