@@ -2,10 +2,25 @@ caa = Proto("CAA", "CAA Protocol")
 
 function caa.dissector(buffer, pinfo, tree)
     pinfo.cols.protocol = "CAA"
+    pinfo.cols.info = "CAA " 
+        .. (buffer(0, 1):bitfield(7, 1) == 1 and "SYN" or "")
+        .. (buffer(0, 1):bitfield(6, 1) == 1 and "ACK" or "")
 
-    local subtree = tree:add(caa, buffer(), "CAA Protocol Data")
+    local subtree = tree:add(caa, buffer(), "CAA Protocol")
 
-    subtree:add(buffer(0, 1), "Flags: " .. buffer(0, 1):bitfield(0, 8))
+    local flagsSubtree = subtree:add(buffer(0, 1), "Flags: " 
+        .. buffer(0, 1):bitfield(0, 1)
+        .. buffer(0, 1):bitfield(1, 1)
+        .. buffer(0, 1):bitfield(2, 1)
+        .. buffer(0, 1):bitfield(3, 1)
+        .. buffer(0, 1):bitfield(4, 1)
+        .. buffer(0, 1):bitfield(5, 1)
+        .. buffer(0, 1):bitfield(6, 1)
+        .. buffer(0, 1):bitfield(7, 1))
+
+    flagsSubtree:add(buffer(0, 1), "SYN: " .. buffer(0, 1):bitfield(7, 1))
+    flagsSubtree:add(buffer(0, 1), "ACK: " .. buffer(0, 1):bitfield(6, 1))
+
     subtree:add(buffer(1, 4), "Sequence Number: " .. buffer(1, 4):uint())
     subtree:add(buffer(5, 4), "Acknowledgement Number: " .. buffer(5, 4):uint())
     subtree:add(buffer(9, 4), "Retransmission Number: " .. buffer(9, 4):uint())
