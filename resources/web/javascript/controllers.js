@@ -105,4 +105,13 @@ chatApp.controller("conversationController", function($scope, $rootScope, websoc
         $scope.conversations.splice(conv, 1);
         $scope.active = $scope.conversations[0];
     }
+
+//    $scope.addEmoticon = function() {
+//        var i = 0;
+//        for (i<EMOTICONS.length) {
+//            if (EMOTICONS[i].link == this.src) {
+//                $scope.conversation.message.text.append(EMOTICONS[i].code);
+//            }
+//        }
+//    }
 });
