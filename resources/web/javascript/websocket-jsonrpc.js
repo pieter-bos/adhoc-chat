@@ -16,7 +16,6 @@ function WebSocketJSONRPC(url) {
             this.callbacks[data.id](data.result);
         } else {
             data.params.unshift(data.method);
-            console.log(data);
             this.emit.apply(this, data.params);
         }
     }).bind(this);
