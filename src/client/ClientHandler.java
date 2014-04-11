@@ -2,6 +2,7 @@ package client;
 
 import client.protocol.*;
 import client.wsjsonrpc.Expose;
+import client.wsjsonrpc.WebSocketJsonRpc;
 import client.wsjsonrpc.WebSocketJsonRpcHandler;
 import org.java_websocket.WebSocket;
 import org.java_websocket.handshake.ClientHandshake;
@@ -15,14 +16,16 @@ import java.io.ObjectOutputStream;
  */
 public class ClientHandler implements WebSocketJsonRpcHandler {
     private NetworkHandler networkHandler;
+    private WebSocketJsonRpc<ClientHandler> rpc;
     private String nick = null;
 
     /**
      * Constructor
      * @param networkHandler Reference to the networkhandler
      */
-    public ClientHandler(NetworkHandler networkHandler) {
+    public ClientHandler(NetworkHandler networkHandler, WebSocketJsonRpc<ClientHandler> rpc) {
         this.networkHandler = networkHandler;
+        this.rpc = rpc;
     }
 
     @Expose
@@ -61,8 +64,8 @@ public class ClientHandler implements WebSocketJsonRpcHandler {
         return true;
     }
 
-    public void sendToClient(Message message) {
-
+    public void sendToClient(String event, Object message) {
+        rpc.notify(event, message);
     }
 
     @Override
