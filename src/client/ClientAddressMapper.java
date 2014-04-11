@@ -23,7 +23,7 @@ public class ClientAddressMapper {
      * @param username
      * @return
      */
-    public InetAddress getAddress(String username) {
+    public InetAddress get(String username) {
         return usernameAddressMap.get(username);
     }
 
@@ -32,7 +32,7 @@ public class ClientAddressMapper {
      * @param address
      * @return
      */
-    public String getUsername(InetAddress address) {
+    public String get(InetAddress address) {
         return addressUsernameMap.get(address);
     }
 
@@ -50,7 +50,7 @@ public class ClientAddressMapper {
      * Removes tuple by username
      * @param username
      */
-    public void removeAddress(String username) {
+    public void remove(String username) {
         InetAddress address = usernameAddressMap.remove(username);
         addressUsernameMap.remove(address);
     }
@@ -59,7 +59,7 @@ public class ClientAddressMapper {
      * Removes tuple by address
      * @param address
      */
-    public void removeUsername(InetAddress address) {
+    public void remove(InetAddress address) {
         String username = addressUsernameMap.remove(address);
         usernameAddressMap.remove(username);
     }
