@@ -12,8 +12,12 @@ function WebSocketJSONRPC(url) {
 
         if(data.error !== undefined) {
             this.emit('error', data.error);
-        } else {
+        } else if(data.id !== undefined) {
             this.callbacks[data.id](data.result);
+        } else {
+            data.params.unshift(data.method);
+            console.log(data);
+            this.emit.apply(this, data.params);
         }
     }).bind(this);
 
@@ -34,10 +38,16 @@ function WebSocketJSONRPC(url) {
     this.on = function(event, callback) {
         if(event in this.events) {
             this.events[event].push(callback);
+        } else {
+            this.events[event] = [callback];
         }
     }
 
     this.emit = function(event) {
+        if(!event in this.events) {
+            return;
+        }
+
         var args = Array.prototype.slice.call(arguments, 1, arguments.length);
 
         for(var callback in this.events[event]) {
