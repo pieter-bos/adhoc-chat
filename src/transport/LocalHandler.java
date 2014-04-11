@@ -2,19 +2,18 @@ package transport;
 
 import exceptions.InvalidPacketException;
 
-import java.net.InetAddress;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.SortedSet;
+import java.util.TreeSet;
 import java.util.concurrent.LinkedBlockingQueue;
 
 public class LocalHandler implements PacketListener {
     private final SocketImpl socket;
     private final LinkedBlockingQueue<Packet> packetQueue;
     // All (out of order) received sequence numbers
-    private SortedSet<Integer> received;
+    private final SortedSet<Integer> received = new TreeSet<>();
     // All (out of order) received packets
-    private HashMap<Integer, Packet> receivedPackets;
+    private final HashMap<Integer, Packet> receivedPackets = new HashMap<>();
 
     public LocalHandler(SocketImpl socket, LinkedBlockingQueue<Packet> packetQueue) {
         this.socket = socket;
@@ -42,8 +41,8 @@ public class LocalHandler implements PacketListener {
 
                 // Send Ack
                 try {
-                    socket.send(new RawPacket(RawPacket.ACK_MASK, socket.getSequenceNumber(packet.getSourceIp()),
-                            packet.getSequenceNumber(), 0, socket.getAddress(), packet.getSourceIp()));
+                    socket.send(new RawPacket(RawPacket.ACK_MASK, 0, packet.getSequenceNumber(),
+                            (int) System.currentTimeMillis(), socket.getAddress(), packet.getSourceIp()));
                 } catch (InvalidPacketException e) {  }
 
                 while(received.size() > 0 && received.first() == socket.lastSequenceNumber(packet.getSourceIp()) + 1) {

@@ -22,7 +22,7 @@ public class WebSocketJsonRpc<T extends WebSocketJsonRpcHandler> extends WebSock
 
     private T handler;
     private Class<T> methodClass;
-    private HashMap<WebSocket, HashSet<String>> subscriptions = new HashMap<>();
+    private HashMap<String, HashSet<WebSocket>> subscriptions = new HashMap<>();
 
     public WebSocketJsonRpc(InetSocketAddress address, T handler, Class<T> cls) {
         super(address);
@@ -32,7 +32,6 @@ public class WebSocketJsonRpc<T extends WebSocketJsonRpcHandler> extends WebSock
 
     @Override
     public void onOpen(WebSocket webSocket, ClientHandshake clientHandshake) {
-        subscriptions.put(webSocket, new HashSet<String>());
         handler.onOpen(webSocket, clientHandshake);
     }
 
@@ -41,7 +40,37 @@ public class WebSocketJsonRpc<T extends WebSocketJsonRpcHandler> extends WebSock
         handler.onClose(webSocket, i, s, b);
     }
 
-    private JsonRpcResponse call(String id, String methodName, JsonArray params) {
+    public void notify(String stream, Object... data) {
+        for(WebSocket socket : getStream(stream)) {
+            socket.send(new Gson().toJson(new JsonRpcNotification(stream, data)));
+        }
+    }
+
+    private JsonRpcResponse call(WebSocket webSocket, String id, String methodName, JsonArray params) {
+        if(methodName.equals("subscribe")) {
+            if(params.size() != 1) {
+                return new JsonRpcError(id, JSONRPC_INVALID_PARAMS, "Subscribe takes only one parameter");
+            }
+
+            String stream = params.get(0).getAsString();
+
+            getStream(stream).add(webSocket);
+
+            return new JsonRpcResult(id, true);
+        }
+
+        if(methodName.equals("unsubscribe")) {
+            if(params.size() != 1) {
+                return new JsonRpcError(id, JSONRPC_INVALID_PARAMS, "Unsubscribe takes only one parameter.");
+            }
+
+            String stream = params.get(0).getAsString();
+
+            getStream(stream).remove(webSocket);
+
+            return new JsonRpcResult(id, true);
+        }
+
         Method[] methods = methodClass.getMethods();
 
         for(Method method : methods) {
@@ -97,7 +126,15 @@ public class WebSocketJsonRpc<T extends WebSocketJsonRpcHandler> extends WebSock
         return new JsonRpcError(id, JSONRPC_METHOD_NOT_FOUND, "The specified method was not found.");
     }
 
-    private JsonRpcResponse getResponse(JsonObject object) {
+    private HashSet<WebSocket> getStream(String stream) {
+        if(subscriptions.get(stream) == null) {
+            subscriptions.put(stream, new HashSet<WebSocket>());
+        }
+
+        return subscriptions.get(stream);
+    }
+
+    private JsonRpcResponse getResponse(WebSocket webSocket, JsonObject object) {
         if(object.has("id") && object.has("jsonrpc") && object.has("method") && object.has("params")) {
             try {
                 String id = object.get("id").getAsString();
@@ -109,7 +146,7 @@ public class WebSocketJsonRpc<T extends WebSocketJsonRpcHandler> extends WebSock
                     return new JsonRpcError(id, JSONRPC_INVALID_REQUEST, "Wrong jsonrpc version.");
                 }
 
-                return call(id, method, params);
+                return call(webSocket, id, method, params);
             } catch(UnsupportedOperationException e) {
                 return new JsonRpcError(null, JSONRPC_INVALID_REQUEST, "Request has wrong parameter types.");
             } finally {
@@ -127,13 +164,13 @@ public class WebSocketJsonRpc<T extends WebSocketJsonRpcHandler> extends WebSock
         Object response;
 
         if(element.isJsonObject()) {
-            response = getResponse(element.getAsJsonObject());
+            response = getResponse(webSocket, element.getAsJsonObject());
         } else if(element.isJsonArray()) {
             LinkedList<JsonRpcResponse> responses = new LinkedList<>();
 
             for(JsonElement call : element.getAsJsonArray()) {
                 if(call.isJsonObject()) {
-                    responses.add(getResponse(call.getAsJsonObject()));
+                    responses.add(getResponse(webSocket, call.getAsJsonObject()));
                 } else {
                     responses.add(new JsonRpcError(null, JSONRPC_INVALID_REQUEST, "Request is not an object."));
                 }
