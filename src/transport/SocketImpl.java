@@ -4,10 +4,7 @@ import exceptions.InvalidPacketException;
 
 import javax.swing.undo.CannotRedoException;
 import java.io.IOException;
-import java.net.DatagramPacket;
-import java.net.InetAddress;
-import java.net.MulticastSocket;
-import java.net.UnknownHostException;
+import java.net.*;
 import java.util.*;
 import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.TimeUnit;
@@ -74,11 +71,17 @@ public class SocketImpl implements Socket {
         this.port = port;
         this.group = InetAddress.getByName(GROUP);
 
-        mulSocket = new MulticastSocket(port);
+        mulSocket = new MulticastSocket(new InetSocketAddress(InetAddress.getLocalHost(), port));
         mulSocket.joinGroup(group);
 
         receiverThread = new ReceiverThread(mulSocket);
 
+        receiverThread.addPacketListener(new PacketListener() {
+            @Override
+            public void onPacketReceived(RawPacket packet) {
+                System.out.println("recv " + packet);
+            }
+        });
         receiverThread.addPacketListener(new SynHandler(this, network));
         receiverThread.addPacketListener(new BroadcastHandler(this));
         receiverThread.addPacketListener(new LocalHandler(this, packetQueue));
@@ -91,7 +94,7 @@ public class SocketImpl implements Socket {
      * @return the local address to which the socket is bound
      */
     public InetAddress getAddress() {
-        return mulSocket.getLocalAddress();
+        return ((InetSocketAddress)(mulSocket.getLocalSocketAddress())).getAddress();
     }
 
     @Override
@@ -156,6 +159,7 @@ public class SocketImpl implements Socket {
      * @param packet the <code>RawPacket</code> to send.
      */
     protected synchronized void send(RawPacket packet) {
+        System.out.println("send " + packet);
         DatagramPacket datagram = new DatagramPacket(packet.getBytes(), packet.getLength(), group, port);
 
         try {
@@ -269,7 +273,8 @@ public class SocketImpl implements Socket {
     public void makeSequenceNumber(InetAddress destinationIp) {
         synchronized (sendLastSequenceNumbers) {
             if (!sendLastSequenceNumbers.containsKey(destinationIp)) {
-                sendLastSequenceNumbers.put(destinationIp, 0);
+                // Initialize sequence number to 1 because SYN has 0.
+                sendLastSequenceNumbers.put(destinationIp, 1);
             }
         }
     }
