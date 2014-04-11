@@ -3,6 +3,7 @@ package client;
 import client.protocol.InviteMessage;
 import client.protocol.Message;
 import client.protocol.NickChangeMessange;
+import client.protocol.TextMessage;
 import transport.Packet;
 import transport.Socket;
 import transport.SocketImpl;
@@ -20,7 +21,7 @@ public class NetworkHandler extends Thread {
     private ClientHandler client;
     private Socket socket;
     private boolean listening = true;
-    public HashMap<String, InetAddress> nameAddressMap;
+    public ClientAddressMapper nameAddressMap;
 
     /**
      * Constructor of NetworkHandler
@@ -29,7 +30,7 @@ public class NetworkHandler extends Thread {
      */
     public NetworkHandler(int port, ClientHandler client){
         this.client = client;
-        this.nameAddressMap = new HashMap<>();
+        this.nameAddressMap = new ClientAddressMapper();
         try {
             this.socket = new SocketImpl(port);
             socket.connect();
@@ -45,13 +46,37 @@ public class NetworkHandler extends Thread {
             Message message = deserialize(packet.getData());
 
             if (message instanceof NickChangeMessange) {
-                updateClientList(packet.getSourceAddress(), message);
+                updateClientList(packet.getSourceAddress(), (NickChangeMessange) message);
+            } else if (message instanceof TextMessage) {
+                sendTextMessage(packet.getSourceAddress(), (TextMessage) message);
             }
         }
     }
 
-    private void updateClientList(InetAddress sourceAddress, Message message) {
+    /**
+     * Sends a text message to the web interface
+     * @param sourceAddress Source address of the package
+     * @param message Parsed message
+     */
+    private void sendTextMessage(final InetAddress sourceAddress, final TextMessage message) {
+        client.sendToClient("textMessage", new Object() {
+            private String source = nameAddressMap.get(sourceAddress);
+            private Message content = message;
+        });
+    }
 
+    /**
+     * Updates the list of clients and sends the new nick to the web interface
+     * @param sourceAddress Source address of the package
+     * @param message Parsed message
+     */
+    private void updateClientList(final InetAddress sourceAddress, final NickChangeMessange message) {
+        nameAddressMap.put(message.getNick(), sourceAddress);
+
+        client.sendToClient("nickChange", new Object() {
+            private String source = nameAddressMap.get(sourceAddress);
+            private Message content = message;
+        });
     }
 
     /**
