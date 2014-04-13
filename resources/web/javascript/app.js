@@ -56,9 +56,9 @@ var chat = angular.module('chat', [])
     this.startConversation = function(user) {
         var newConv = new Conversation(user);
 
-        for (var conversation in this.conversations) {
-            if (conversation === newConv) {
-                return; //TODO: fix equals check
+        for (var i = 0; i < this.conversations.length; i++) {
+            if (this.conversations[i].equals(newConv)) {
+                return;
             }
         }
 
