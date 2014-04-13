@@ -59,13 +59,7 @@
                 <div ng-repeat="conversation in conversations" id="{{conversation.id}}" class="tab-pane {{conversation.active}}">
                     <ul class="list-unstyled message-field">
                         <li ng-repeat="message in conversation.messages">
-                            <span>{{message.name}}:</span>
-                            <span ng-repeat="part in message.value">
-                                <span ng-switch on="part.type">
-                                    <span ng-switch-when="text">{{part.value}}</span>
-                                    <img ng-switch-when="emoticon" src="{{part.src}}">
-                                </span>
-                            </span>
+                            <span>{{message.name}}: {{message.value}}</span>
                         </li>
                     </ul>
 
@@ -81,7 +75,7 @@
                             </li>
                         </ul>
 
-                        <input ng-if="conversation.removable" ng-click="leaveConversation()" id="leave-conv" class="btn btn-danger" type="button" value="Leave Conversation" />
+                        <input ng-if="conversation.removable" ng-click="closeConversation()" id="leave-conv" class="btn btn-danger" type="button" value="Leave Conversation" />
                     </form>
 
                 </div>
