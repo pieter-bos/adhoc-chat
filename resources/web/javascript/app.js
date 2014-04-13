@@ -7,6 +7,7 @@ function User(ip, nickname) {
 // Conversation object
 function Conversation(user) {
     this.user = user;
+    this.active = 'active';
     this.messages = [];
 
     this.title = function() {
@@ -53,6 +54,16 @@ var chat = angular.module('chat', [])
 .service('conversationModel', function($rootScope, websocketService) {
     this.conversations = [new Conversation(new User('0.0.0.0', 'Everyone'))];
 
+    // Adds a new conversation to the list and makes all other conversations inactive
+    this.addConversation = function(conv) {
+        for (var i = 0; i < this.conversations.length; i++) {
+            this.conversations[i].active = '';
+        }
+
+        this.conversations.push(conv);
+    }
+
+    // Starts a new conversation with the user if there is no current conversation with the user
     this.startConversation = function(user) {
         var newConv = new Conversation(user);
 
@@ -62,7 +73,7 @@ var chat = angular.module('chat', [])
             }
         }
 
-        this.conversations.push(newConv);
+        this.addConversation(newConv);
         $rootScope.$broadcast('conversationModel::conversationsChanged');
     }
 })
