@@ -38,7 +38,7 @@ var chat = angular.module('chat', [])
     }
 
     this.init = function() {
-//        $('#nick-modal').modal({ keyboard: false, backdrop: 'static' });
+        $('#nick-modal').modal({ keyboard: false, backdrop: 'static' });
         $('#nick-modal form').on('submit', function(event) {
             $('#nick-modal').modal('hide');
         });
