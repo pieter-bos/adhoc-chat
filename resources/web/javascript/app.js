@@ -23,6 +23,15 @@ var chat = angular.module('chat', [])
 })
 // Provides functions to manipulate user model
 .service('userModel', function(websocketService) {
+    function User(ip, nickname) {
+        this.ip = ip;
+        this.nickname = nickname;
+    }
+
+    this.users = [
+        new User('192.168.0.0', 'laurens'),
+        new User('192.168.0.1', 'sophie')
+    ];
 
 })
 // Provides function to manipulate conversation model
@@ -45,8 +54,12 @@ var chat = angular.module('chat', [])
     });
 })
 // Controller for user related views
-.controller('userController', function($scope, userModel) {
+.controller('userController', function($scope, userModel, conversationModel) {
+    $scope.users = userModel.users;
 
+    $scope.startConversation = function() {
+
+    }
 })
 // Controller for conversation related views
 .controller('conversationController', function($scope, conversationModel) {

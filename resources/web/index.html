@@ -40,17 +40,15 @@
                     or type something in the chat-window to the right to chat with everyone!
                 </p>
             </div>
-            <div class="well" ng-controller="userController>
+            <div class="well" ng-controller="userController">
                 <ul class="nav nav-pills nav-stacked">
-                    <li ng-repeat="user in users">
-                        <a>
-                            {{user.name}}
-                            <span ng-click="addToConversation()" id="add-to-conv" class="glyphicon glyphicon-plus"></span>
-                        </a>
+                    <li ng-repeat="user in users" ng-click="startConversation()">
+                        <a>{{user.nickname}}</a>
                     </li>
                 </ul>
             </div>
         </div>
+
         <div ng-controller="conversationController" class="col-md-8 well">
             <ul class="nav nav-tabs">
                 <li ng-repeat="conversation in conversations" ng-click="setActive()" class="{{isActive(conversation)}}">
