@@ -283,7 +283,7 @@ public class SocketImpl implements Socket {
      * Get a sequence number for a packet to be send to the specified destination.
      * The retrieved sequence number must be send to the destination.
      * @param destinationIp the destination
-     * @return a unique for a packet to the specified destination
+     * @return a unique sequence number for a packet to the specified destination
      */
     public int getSequenceNumber(InetAddress destinationIp) {
         synchronized (sendLastSequenceNumbers) {

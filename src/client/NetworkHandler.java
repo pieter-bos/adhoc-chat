@@ -1,9 +1,16 @@
 package client;
 
+import client.protocol.InviteMessage;
+import client.protocol.Message;
+import client.protocol.NickChangeMessange;
+import client.protocol.TextMessage;
+import transport.Packet;
 import transport.Socket;
 import transport.SocketImpl;
 
+import java.io.ByteArrayInputStream;
 import java.io.IOException;
+import java.io.ObjectInputStream;
 import java.net.InetAddress;
 import java.util.HashMap;
 
@@ -14,7 +21,7 @@ public class NetworkHandler extends Thread {
     private ClientHandler client;
     private Socket socket;
     private boolean listening = true;
-    public HashMap<String, InetAddress> nameAddressMap;
+    public ClientAddressMapper nameAddressMap;
 
     /**
      * Constructor of NetworkHandler
@@ -23,7 +30,7 @@ public class NetworkHandler extends Thread {
      */
     public NetworkHandler(int port, ClientHandler client){
         this.client = client;
-        this.nameAddressMap = new HashMap<>();
+        this.nameAddressMap = new ClientAddressMapper();
         try {
             this.socket = new SocketImpl(port);
             socket.connect();
@@ -34,7 +41,42 @@ public class NetworkHandler extends Thread {
 
     @Override
     public void run() {
-        //TODO implement
+        while (listening) {
+            Packet packet = socket.receive();
+            Message message = deserialize(packet.getData());
+
+            if (message instanceof NickChangeMessange) {
+                updateClientList(packet.getSourceAddress(), (NickChangeMessange) message);
+            } else if (message instanceof TextMessage) {
+                sendTextMessage(packet.getSourceAddress(), (TextMessage) message);
+            }
+        }
+    }
+
+    /**
+     * Sends a text message to the web interface
+     * @param sourceAddress Source address of the package
+     * @param message Parsed message
+     */
+    private void sendTextMessage(final InetAddress sourceAddress, final TextMessage message) {
+        client.sendToClient("textMessage", new Object() {
+            private String source = nameAddressMap.get(sourceAddress);
+            private Message content = message;
+        });
+    }
+
+    /**
+     * Updates the list of clients and sends the new nick to the web interface
+     * @param sourceAddress Source address of the package
+     * @param message Parsed message
+     */
+    private void updateClientList(final InetAddress sourceAddress, final NickChangeMessange message) {
+        nameAddressMap.put(message.getNick(), sourceAddress);
+
+        client.sendToClient("nickChange", new Object() {
+            private String source = nameAddressMap.get(sourceAddress);
+            private Message content = message;
+        });
     }
 
     /**
@@ -52,5 +94,22 @@ public class NetworkHandler extends Thread {
      */
     public void broadcast(byte[] data) {
         socket.broadcast(data);
+    }
+
+    /**
+     * Deserializes a message from a byte array
+     * @param data Input array
+     * @return Deserialized message
+     */
+    private Message deserialize(byte[] data) {
+        try {
+            ByteArrayInputStream bis = new ByteArrayInputStream(data);
+            ObjectInputStream in = new ObjectInputStream(bis);
+            Message message = (Message) in.readObject();
+            return message;
+        } catch (IOException | ClassNotFoundException e) {
+            e.printStackTrace();
+            return null;
+        }
     }
 }

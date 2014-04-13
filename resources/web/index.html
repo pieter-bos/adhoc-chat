@@ -2,7 +2,7 @@
 <html ng-app="chatApp">
 <head lang="en">
     <meta charset="UTF-8">
-    <title>Chat4Blub</title>
+    <title>Hamsters' Chat</title>
     <link rel="stylesheet" href="css/bootstrap.css"/>
     <link rel="stylesheet" href="css/style.css"/>
 
@@ -14,14 +14,32 @@
     <script src="javascript/controllers.js"></script>
 </head>
 <body>
-
-<img id="hamster" src="hamster.jpg">
-
 <div class="container">
+    <h1>Hamsters for life</h1>
+    <h4>
+        <small>
+            context-aware cloud-based distributed serverless decentralized cryptocurrency-based interpersonal conversational community-driven application
+        </small>
+    </h4>
     <div class="row">
         <div class="col-md-4" ng-controller="userController">
-            <div class="well">
-                <h1>{{nick}}</h1>
+            <div class="modal fade" id="nick-modal" tabindex="-1" role="dialog" aria-hidden="true" aria-labelledby="nick-modal-label">
+                <div class="modal-dialog">
+                    <div class="modal-content">
+                        <div class="modal-header">
+                            <h4 class="modal-title" id="myModalLabel">Choose your nickname...</h4>
+                        </div>
+                        <div class="modal-body">
+                            <form class="form-horizontal" role="form">
+                                <input type="text" ng-model="nick" class="form-control" placeholder="Press enter when you're done..."/>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="well" ng-click="showModal()">
+                <h4>Your nickname (click to change):</h4>
+                <h3>{{ nick }}</h3>
             </div>
             <div class="well">
                 <ul class="nav nav-pills nav-stacked">
@@ -34,7 +52,7 @@
                 </ul>
             </div>
         </div>
-        <div ng-controller="conversationController" class="col-md-8">
+        <div ng-controller="conversationController" class="col-md-8 well">
             <ul class="nav nav-tabs">
                 <li ng-repeat="conversation in conversations" ng-click="setActive()" class="{{isActive(conversation)}}">
                     <a href="#{{conversation.id}}" data-toggle="tab">{{conversation.title()}}</a>
@@ -46,7 +64,15 @@
             <div class="tab-content">
                 <div ng-repeat="conversation in conversations" id="{{conversation.id}}" class="tab-pane {{isActive(conversation)}}">
                     <ul class="list-unstyled message-field">
-                        <li ng-repeat="message in conversation.messages">{{message.name}}: {{message.text}}</li>
+                        <li ng-repeat="message in conversation.messages">
+                            <span>{{message.name}}:</span>
+                            <span ng-repeat="part in message.value">
+                                <span ng-switch on="part.type">
+                                    <span ng-switch-when="text">{{part.value}}</span>
+                                    <img ng-switch-when="emoticon" src="{{part.src}}">
+                                </span>
+                            </span>
+                        </li>
                     </ul>
 
                     <form ng-submit="sendMessage()" class="form-inline" role="form">
@@ -56,21 +82,7 @@
                         <button type="button" class="btn btn-info dropdown-toggle" data-toggle="dropdown">
                             Emoticons<span class="caret"></span></button>
                             <ul class="list-inline dropdown-menu" role="menu">
-                                <li><img onclick="addEmoticon()" src="chat-emoticons/emoticon-1.gif"></a></li>
-                                <li><img onclick="addEmoticon()" src="chat-emoticons/emoticon-2.gif"></li>
-                                <li><img onclick="addEmoticon()" src="chat-emoticons/emoticon-3.gif"></li>
-                                <li><img onclick="addEmoticon()" src="chat-emoticons/emoticon-4.gif"></li>
-                                <li><img onclick="addEmoticon()" src="chat-emoticons/emoticon-5.gif"></li>
-                                <li><img onclick="addEmoticon()" src="chat-emoticons/emoticon-6.gif"></li>
-                                <li><img onclick="addEmoticon()" src="chat-emoticons/emoticon-7.gif"></li>
-                                <li><img onclick="addEmoticon()" src="chat-emoticons/emoticon-8.gif"></li>
-                                <li><img onclick="addEmoticon()" src="chat-emoticons/emoticon-9.gif"></li>
-                                <li><img onclick="addEmoticon()" src="chat-emoticons/emoticon-10.gif"></li>
-                                <li><img onclick="addEmoticon()" src="chat-emoticons/emoticon-11.gif"></li>
-                                <li><img onclick="addEmoticon()" src="chat-emoticons/emoticon-12.gif"></li>
-                                <li><img onclick="addEmoticon()" src="chat-emoticons/emoticon-13.gif"></li>
-                                <li><img onclick="addEmoticon()" src="chat-emoticons/emoticon-14.gif"></li>
-                                <li><img onclick="addEmoticon()" src="chat-emoticons/emoticon-15.gif"></li>
+                                <li ng-controller="emoticonController" ng-repeat="emoticon in EMOTICONS"><img ng-click="addEmoticon()" src={{emoticon.link}}></li>
                             </ul>
 
                         <input ng-click="leaveConversation()" id="leave-conv" class="btn btn-danger" type="button" value="Leave Conversation">

@@ -13,4 +13,8 @@ public class NickChangeMessange extends Message {
     public NickChangeMessange(String nick) {
         this.nick = nick;
     }
+
+    public String getNick() {
+        return nick;
+    }
 }

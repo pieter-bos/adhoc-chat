@@ -2,6 +2,7 @@ package client;
 
 import client.protocol.*;
 import client.wsjsonrpc.Expose;
+import client.wsjsonrpc.WebSocketJsonRpc;
 import client.wsjsonrpc.WebSocketJsonRpcHandler;
 import org.java_websocket.WebSocket;
 import org.java_websocket.handshake.ClientHandshake;
@@ -15,14 +16,16 @@ import java.io.ObjectOutputStream;
  */
 public class ClientHandler implements WebSocketJsonRpcHandler {
     private NetworkHandler networkHandler;
+    private WebSocketJsonRpc<ClientHandler> rpc;
     private String nick = null;
 
     /**
      * Constructor
      * @param networkHandler Reference to the networkhandler
      */
-    public ClientHandler(NetworkHandler networkHandler) {
+    public ClientHandler(NetworkHandler networkHandler, WebSocketJsonRpc<ClientHandler> rpc) {
         this.networkHandler = networkHandler;
+        this.rpc = rpc;
     }
 
     @Expose
@@ -34,7 +37,8 @@ public class ClientHandler implements WebSocketJsonRpcHandler {
         return true;
     }
 
-    @Expose boolean invite(int conversation, String destination) {
+    @Expose
+    public boolean invite(int conversation, String destination) {
         networkHandler.send(
                 serialize(new InviteMessage(conversation, null)),
                 networkHandler.nameAddressMap.get(destination)
@@ -60,19 +64,23 @@ public class ClientHandler implements WebSocketJsonRpcHandler {
         return true;
     }
 
+    public void sendToClient(String event, Object message) {
+        rpc.notify(event, message);
+    }
+
     @Override
     public void onOpen(WebSocket webSocket, ClientHandshake clientHandshake) {
-
+    //TODO implement
     }
 
     @Override
     public void onClose(WebSocket webSocket, int i, String s, boolean b) {
-
+    //TODO implement
     }
 
     @Override
     public void onError(WebSocket webSocket, Exception e) {
-
+    //TODO implement
     }
 
     /**
