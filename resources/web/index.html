@@ -15,6 +15,7 @@
 <body>
 <div class="container">
     <h1>Hamster Chat</h1>
+
     <div class="row">
         <div class="col-md-4" ng-controller="userController">
             <div class="modal fade" id="nick-modal" tabindex="-1" role="dialog" aria-hidden="true" aria-labelledby="nick-modal-label">
@@ -33,6 +34,7 @@
             </div>
             <div class="well" ng-click="showModal()">
                 <h4>Your nickname (click to change):</h4>
+
                 <h3>{{ nick }}</h3>
             </div>
             <div class="well">
@@ -70,16 +72,18 @@
                     </ul>
 
                     <form ng-submit="sendMessage()" class="form-inline" role="form">
-                        <input ng-model="conversation.message" type="text" class="form-control" >
+                        <input ng-model="conversation.message" type="text" class="form-control">
                         <input class="btn btn-primary" type="submit" value="Send">
 
                         <button type="button" class="btn btn-info dropdown-toggle" data-toggle="dropdown">
                             Emoticons<span class="caret"></span></button>
-                            <ul class="list-inline dropdown-menu" role="menu">
-                                <li ng-controller="emoticonController" ng-repeat="emoticon in EMOTICONS"><img ng-click="addEmoticon()" src={{emoticon.link}}></li>
-                            </ul>
+                        <ul class="list-inline dropdown-menu" role="menu">
+                            <li ng-controller="emoticonController" ng-repeat="emoticon in EMOTICONS">
+                                <img ng-click="addEmoticon()" src={{emoticon.link}} />
+                            </li>
+                        </ul>
 
-                        <input ng-click="leaveConversation()" id="leave-conv" class="btn btn-danger" type="button" value="Leave Conversation">
+                        <input ng-click="leaveConversation()" id="leave-conv" class="btn btn-danger" type="button" value="Leave Conversation" />
                     </form>
 
                 </div>
