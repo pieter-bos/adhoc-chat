@@ -5,9 +5,11 @@ function User(ip, nickname) {
 }
 
 // Conversation object
-function Conversation(user) {
+function Conversation(user, removable) {
+    this.id = Math.floor((Math.random()*100000)+1);
     this.user = user;
     this.active = 'active';
+    this.removable = removable == undefined ? true : removable;
     this.messages = [];
 
     this.title = function() {
@@ -52,7 +54,7 @@ var chat = angular.module('chat', [])
 })
 // Provides function to manipulate conversation model
 .service('conversationModel', function($rootScope, websocketService) {
-    this.conversations = [new Conversation(new User('0.0.0.0', 'Everyone'))];
+    this.conversations = [new Conversation(new User('0.0.0.0', 'Everyone'), false)];
 
     // Adds a new conversation to the list and makes all other conversations inactive
     this.addConversation = function(conv) {

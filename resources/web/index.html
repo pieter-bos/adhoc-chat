@@ -51,15 +51,12 @@
 
         <div ng-controller="conversationController" class="col-md-8 well">
             <ul class="nav nav-tabs">
-                <li ng-repeat="conversation in conversations" ng-click="setActive()" class="{{isActive(conversation)}}">
+                <li ng-repeat="conversation in conversations" ng-click="setActive()" class="{{conversation.active}}">
                     <a href="#{{conversation.id}}" data-toggle="tab">{{conversation.title()}}</a>
-                </li>
-                <li ng-click="addConversation()">
-                    <a><span class="glyphicon glyphicon-plus"></span> Start new conversation</a>
                 </li>
             </ul>
             <div class="tab-content">
-                <div ng-repeat="conversation in conversations" id="{{conversation.id}}" class="tab-pane {{isActive(conversation)}}">
+                <div ng-repeat="conversation in conversations" id="{{conversation.id}}" class="tab-pane {{conversation.active}}">
                     <ul class="list-unstyled message-field">
                         <li ng-repeat="message in conversation.messages">
                             <span>{{message.name}}:</span>
@@ -84,7 +81,7 @@
                             </li>
                         </ul>
 
-                        <input ng-click="leaveConversation()" id="leave-conv" class="btn btn-danger" type="button" value="Leave Conversation" />
+                        <input ng-if="conversation.removable" ng-click="leaveConversation()" id="leave-conv" class="btn btn-danger" type="button" value="Leave Conversation" />
                     </form>
 
                 </div>
