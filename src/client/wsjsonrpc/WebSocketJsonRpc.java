@@ -115,9 +115,14 @@ public class WebSocketJsonRpc<T extends WebSocketJsonRpcHandler> extends WebSock
                     try {
                         return new JsonRpcResult(id, method.invoke(handler, callParams));
                     } catch (IllegalAccessException e) {
+                        e.printStackTrace();
                         return new JsonRpcError(id, JSONRPC_INTERNAL_ERROR, "Internal Error: IllegalAccessException");
                     } catch (InvocationTargetException e) {
+                        e.printStackTrace();
                         return new JsonRpcError(id, JSONRPC_INTERNAL_ERROR, "Internal Error: InvocationTargetException");
+                    } catch (Exception e) {
+                        e.printStackTrace();
+                        return new JsonRpcError(id, JSONRPC_INTERNAL_ERROR, "Internal Error: " + e.getMessage());
                     }
                 }
             }
