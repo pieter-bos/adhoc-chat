@@ -15,13 +15,15 @@ public class Main {
      * Constructor
      */
     public Main() {
+        state = new ApplicationState();
         network = new NetworkHandler(3000, state);
         client = new ClientHandler(state);
+        state.setHandlers(client, network);
         final WebSocketJsonRpc<ClientHandler> rpc = new WebSocketJsonRpc<ClientHandler>(new InetSocketAddress(8081), client, ClientHandler.class);
         client.setSocket(rpc);
 
         rpc.start();
-        state = new ApplicationState(client, network);
+
     }
 
     public static void main(String[] args) {

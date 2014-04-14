@@ -1,9 +1,3 @@
-// User object
-function User(ip, nickname) {
-    this.ip = ip;
-    this.nickname = nickname;
-}
-
 // Conversation object
 function Conversation(user, removable) {
     this.id = Math.floor((Math.random()*100000)+1);
@@ -15,7 +9,7 @@ function Conversation(user, removable) {
     this.messages = [];
 
     this.title = function() {
-        return this.user.nickname;
+        return this.user;
     }
 
     this.equals = function(other) {
@@ -27,10 +21,15 @@ var chat = angular.module('chat', [])
 // Provides functions for websocket communication
 .service('websocketService', function($rootScope) {
     this.socket = new WebSocketJSONRPC("ws://localhost:8081/")
-        .def('updateNickname');
+        .def('updateNickname')
+        .def('sendMessage');
 
     this.updateNickname = function(nickname) {
-        this.socket.updateNickname(nickname, function(e) { console.log(e) });
+        this.socket.updateNickname(nickname, function(e) { console.log(e); });
+    }
+
+    this.sendMessage = function(message, convId) {
+        this.socket.sendMessage(message, convId, function(e) { console.log(e); });
     }
 })
 // Provides application settings
@@ -54,15 +53,11 @@ var chat = angular.module('chat', [])
 })
 // Provides functions to manipulate user model
 .service('userModel', function(websocketService) {
-    this.users = [
-        new User('192.168.0.0', 'laurens'),
-        new User('192.168.0.1', 'sophie')
-    ];
-
+    this.users = [];
 })
 // Provides function to manipulate conversation model
 .service('conversationModel', function($rootScope, websocketService) {
-    this.conversations = [new Conversation(new User('0.0.0.0', 'Everyone'), false)];
+    this.conversations = [new Conversation('Everyone', false)];
 
     // Adds a new conversation to the list and makes all other conversations inactive
     this.addConversation = function(conv) {
@@ -118,14 +113,13 @@ var chat = angular.module('chat', [])
     }
 })
 // Controller for conversation related views
-.controller('conversationController', function($scope, conversationModel) {
+.controller('conversationController', function($scope, conversationModel, websocketService) {
     $scope.conversations = conversationModel.conversations;
 
     $scope.sendMessage = function() {
         if (this.conversation.message != '') {
-            this.conversation.messages.push({name: 'you', value: this.conversation.message});
+            websocketService.sendMessage(this.conversation.message, this.conversation.id);
             this.conversation.message = '';
-            $('.tab-pane').animate({scrollTop: $('.tab-pane').height()+999999}, 'slow');
         }
     }
 

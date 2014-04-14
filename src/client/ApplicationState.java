@@ -1,5 +1,7 @@
 package client;
 
+import client.protocol.TextMessage;
+
 import java.util.LinkedList;
 import java.util.List;
 
@@ -7,8 +9,8 @@ import java.util.List;
  * Keeps track of the complete state of the client
  */
 public class ApplicationState {
-    private final ClientHandler client;
-    private final NetworkHandler network;
+    private ClientHandler client;
+    private NetworkHandler network;
 
     private String nickname;
     private ClientAddressMapper users;
@@ -20,7 +22,7 @@ public class ApplicationState {
 
     public void setNickname(String nickname) {
         this.nickname = nickname;
-        network.broadcast(nickname.getBytes());
+//        network.broadcast(nickname.getBytes());
     }
 
     /**
@@ -28,10 +30,17 @@ public class ApplicationState {
      * @param client
      * @param network
      */
-    public ApplicationState(ClientHandler client, NetworkHandler network) {
-        this.client = client;
-        this.network = network;
+    public ApplicationState() {
         users = new ClientAddressMapper();
         conversationList = new LinkedList<>();
+    }
+
+    public void setHandlers(ClientHandler client, NetworkHandler network) {
+        this.client = client;
+        this.network = network;
+    }
+
+    public void sendMessage(TextMessage message) {
+//        network.broadcast(message);
     }
 }

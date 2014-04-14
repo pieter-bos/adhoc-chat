@@ -1,8 +1,10 @@
 package client;
 
+import client.protocol.TextMessage;
 import client.wsjsonrpc.Expose;
 import client.wsjsonrpc.WebSocketJsonRpc;
 import client.wsjsonrpc.WebSocketJsonRpcHandler;
+import com.google.gson.Gson;
 import org.java_websocket.WebSocket;
 import org.java_websocket.handshake.ClientHandshake;
 
@@ -38,9 +40,20 @@ public class ClientHandler implements WebSocketJsonRpcHandler {
 
     @Expose
     public boolean updateNickname(String nickname) {
-        System.out.println("Update nickname: " + nickname);
         state.setNickname(nickname);
 
         return true;
+    }
+
+    @Expose
+    public String sendMessage(final String data, final int convId) {
+        TextMessage message = new TextMessage(data);
+        state.sendMessage(message);
+
+        return new Gson().toJson(new Object() {
+            public int id = convId;
+            public String nickname = state.getNickname();
+            public String message = data;
+        });
     }
 }
