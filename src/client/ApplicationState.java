@@ -5,6 +5,7 @@ import client.protocol.TextMessage;
 import com.google.gson.Gson;
 
 import java.net.InetAddress;
+import java.net.UnknownHostException;
 import java.util.*;
 
 /**
@@ -35,6 +36,12 @@ public class ApplicationState {
         conversationList = new HashMap<>();
         int id = new Random().nextInt(10000);
         conversationList.put(id, new Conversation("", id));
+        try {
+            users.put("Sophie", InetAddress.getByName("192.168.2.1"));
+            users.put("Laurens", InetAddress.getByName("192.168.2.2"));
+        } catch (UnknownHostException e) {
+            e.printStackTrace();
+        }
     }
 
     public void setHandlers(ClientHandler client, NetworkHandler network) {
@@ -68,5 +75,9 @@ public class ApplicationState {
 
     public Map<Integer, Conversation> getConversationList() {
         return conversationList;
+    }
+
+    public ClientAddressMapper getUsers() {
+        return users;
     }
 }

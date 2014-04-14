@@ -23,6 +23,7 @@ var chat = angular.module('chat', [])
     var self = this;
     this.socket = new WebSocketJSONRPC("ws://localhost:8081/")
         .def('getConversations')
+        .def('getUsers')
         .def('updateNickname')
         .def('sendMessage')
         .def('subscribe');
@@ -50,6 +51,13 @@ var chat = angular.module('chat', [])
         self.socket.getConversations(function(e) {
             $rootScope.$broadcast('websocketService::newConversation', e);
         });
+
+        self.socket.getUsers(function(e) {
+            JSON.parse(e).forEach(function(element) {
+                console.log(element);
+                $rootScope.$broadcast('websocketService::newUser', element);
+            });
+        });
     });
 })
 // Provides application settings
@@ -72,8 +80,14 @@ var chat = angular.module('chat', [])
     this.init();
 })
 // Provides functions to manipulate user model
-.service('userModel', function(websocketService) {
+.service('userModel', function($rootScope, websocketService) {
+    var self = this;
     this.users = [];
+
+    $rootScope.$on('websocketService::newUser', function(event, user) {
+        self.users.push(user);
+        $rootScope.$broadcast('userModel::usersChanged');
+    });
 })
 // Provides function to manipulate conversation model
 .service('conversationModel', function($rootScope, websocketService) {
@@ -156,6 +170,11 @@ var chat = angular.module('chat', [])
     $scope.startConversation = function() {
         conversationModel.startConversation(this.user);
     }
+
+    $scope.$on('userModel::usersChanged', function() {
+        $scope.users = userModel.users;
+        $scope.$apply();
+    });
 })
 // Controller for conversation related views
 .controller('conversationController', function($scope, conversationModel, websocketService) {

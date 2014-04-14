@@ -1,6 +1,7 @@
 package client;
 
 import java.net.InetAddress;
+import java.util.Collection;
 import java.util.HashMap;
 
 /**
@@ -64,5 +65,9 @@ public class ClientAddressMapper {
     public void remove(InetAddress address) {
         String username = addressUsernameMap.remove(address);
         usernameAddressMap.remove(username);
+    }
+
+    public Collection<String> values() {
+        return addressUsernameMap.values();
     }
 }
