@@ -3,14 +3,14 @@ package client.protocol;
 /**
  * Broadcasted by client to notify others of it's presence on the network
  */
-public class NickChangeMessange extends Message {
+public class NickChangeMessage extends Message {
     private String nick;
 
     /**
      * Constructor
      * @param nick Nickname of this client
      */
-    public NickChangeMessange(String nick) {
+    public NickChangeMessage(String nick) {
         this.nick = nick;
     }
 
