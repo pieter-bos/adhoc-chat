@@ -12,6 +12,7 @@ public class RawPacket {
     public static final byte ACK_MASK =      0b00000001;
     public static final byte SYN_MASK =      0b00000010;
     public static final byte ANNOUNCE_MASK = 0b00000100;
+    private static final byte[] BROADCAST_ADDRESS = new byte[] { 0, 0, 0, 0 };
 // private static final byte ZERO_MASK = 0b10000000; this bit must always be zero because evil stupid java only has signed byte.
 
     private int nonce;
@@ -140,6 +141,10 @@ public class RawPacket {
         return data;
     }
 
+    public byte getFlags() {
+        return flags;
+    }
+
     public byte[] getBytes() {
         ByteBuffer buffer = ByteBuffer.allocate(getLength());
 
@@ -181,8 +186,8 @@ public class RawPacket {
         return result;
     }
 
-    public byte getFlags() {
-        return flags;
+    public static int newNonce() {
+        return (int) System.currentTimeMillis();
     }
 
     @Override
@@ -206,6 +211,35 @@ public class RawPacket {
         return result;
     }
 
-////// static methods for creating specific packets
+    public static RawPacket newAnnounce(InetAddress sourceAddress) {
+        try {
+            return new RawPacket(newNonce(), ANNOUNCE_MASK, 0, 0, sourceAddress.getAddress(), BROADCAST_ADDRESS);
+        } catch (InvalidPacketException e) {
+            return null;
+        }
+    }
 
+    public static RawPacket newSynchronization(int sequenceNumber, InetAddress sourceAddress, InetAddress destinationAddress) {
+        try {
+            return new RawPacket(newNonce(), SYN_MASK, sequenceNumber, 0, sourceAddress, destinationAddress);
+        } catch (InvalidPacketException e) {
+            return null;
+        }
+    }
+
+    public static RawPacket newSynAck(int sequenceNumber, int ackNumber, InetAddress sourceAddress, InetAddress destinationAddress) {
+        try {
+            return new RawPacket(newNonce(), (byte) (SYN_MASK | ACK_MASK), sequenceNumber, ackNumber, sourceAddress, destinationAddress);
+        } catch (InvalidPacketException e) {
+            return null;
+        }
+    }
+
+    public static RawPacket newData(int sequenceNumber, InetAddress sourceAddress, InetAddress destinationAddress, byte[] data) {
+        try {
+            return new RawPacket(newNonce(), (byte) 0, sequenceNumber, 0, sourceAddress, destinationAddress, data);
+        } catch(InvalidPacketException e) {
+            return null;
+        }
+    }
 }
