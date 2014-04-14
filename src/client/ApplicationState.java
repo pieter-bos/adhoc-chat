@@ -1,5 +1,6 @@
 package client;
 
+import client.protocol.NickChangeMessage;
 import client.protocol.TextMessage;
 import com.google.gson.Gson;
 
@@ -26,13 +27,11 @@ public class ApplicationState {
 
     public void setNickname(String nickname) {
         this.nickname = nickname;
-//        network.broadcast(nickname.getBytes());
+        network.broadcast(new Gson().toJson(new NickChangeMessage(nickname)).getBytes());
     }
 
     /**
      * Constructor
-     * @param client
-     * @param network
      */
     public ApplicationState() {
         users = new ClientAddressMapper();
@@ -48,5 +47,21 @@ public class ApplicationState {
         Conversation conv = this.conversationList.get(message.getConvId());
         InetAddress dest = this.users.get(conv.getUser());
         network.send(new Gson().toJson(message).getBytes(), dest);
+    }
+
+    public void addUser(NickChangeMessage message, InetAddress source) {
+        users.put(message.getNick(), source);
+    }
+
+    public void receiveMessage(TextMessage message, InetAddress source) {
+        String user = users.get(source);
+        Conversation conv = conversationList.get(message.getConvId());
+
+        if (conv == null) {
+            conversationList.put(message.getConvId(), new Conversation(message.getNickname(), message.getConvId()));
+            conv = conversationList.get(message.getConvId());
+        }
+
+        conv.addMessage(new TextMessage(message.getMessage(), user, conv.getId()));
     }
 }
