@@ -36,6 +36,24 @@ public class DataHandler implements PacketListener {
                             Util.differenceWithWrapAround(packet.getSequenceNumber(), outOfOrderPackets.get(packet.getSourceIp()).last().getSequenceNumber()) > MAX_DIFFERENCE) {
                 lastInOrderSequenceNumber.put(packet.getSourceIp(), packet.getSequenceNumber());
                 outOfOrderPackets.put(packet.getSourceIp(), new TreeSet<RawPacket>());
+                // TODO clear sentButNoAck
+            } else {
+                outOfOrderPackets.get(packet.getSourceIp()).add(packet);
+            }
+        } else if (!packet.isAck() && !packet.isAnnounce()) { // TODO misschien betere/andere check
+            // data packet
+            outOfOrderPackets.get(packet.getSourceIp()).add(packet);
+        }
+
+        Iterator<RawPacket> it = outOfOrderPackets.get(packet.getSourceIp()).iterator();
+        while (it.hasNext()) {
+            RawPacket cur = it.next();
+            if (cur.getSequenceNumber() == lastInOrderSequenceNumber.get(packet.getSourceIp()) +1) {
+                queue.add(new PacketImpl(cur));
+                lastInOrderSequenceNumber.put(packet.getSourceIp(), cur.getSequenceNumber());
+                it.remove();
+            } else {
+                break;
             }
         }
     }
