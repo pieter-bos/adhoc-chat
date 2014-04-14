@@ -4,13 +4,12 @@ import transport.Packet;
 
 import java.io.IOException;
 import java.net.*;
-import java.util.Enumeration;
-import java.util.Timer;
-import java.util.TimerTask;
+import java.util.*;
 import java.util.concurrent.LinkedBlockingQueue;
 
 public class SocketImpl implements Socket {
     private static final long ANNOUNCE_INTERVAL = 30 * 1000;
+    private static final int MAX_TIME_PREVIOUS_ANNOUNCE = 3;
     private static String GROUP = "244.244.244.244";
 
     private final InetAddress ip;
@@ -18,6 +17,8 @@ public class SocketImpl implements Socket {
     private boolean connected = false;
     private final LinkedBlockingQueue<Packet> receiveQueue = new LinkedBlockingQueue<>();
     private final ReceiverThread receiverThread;
+
+    private final HashMap<InetAddress, Long> timeLastAnnounceReceived = new HashMap<>();
 
 
     public SocketImpl(int port) throws IOException {
@@ -52,6 +53,7 @@ public class SocketImpl implements Socket {
     }
 
     @Override
+    @SuppressWarnings("unchecked")
     public void connect() throws IOException {
         send(RawPacket.newAnnounce(getIp()));
 
@@ -60,6 +62,16 @@ public class SocketImpl implements Socket {
             public void run() {
                 try {
                     send(RawPacket.newAnnounce(getIp()));
+
+                    synchronized (timeLastAnnounceReceived) {
+                        Iterator<Map.Entry<InetAddress, Long>> it = timeLastAnnounceReceived.entrySet().iterator();
+                        while (it.hasNext()) {
+                            Map.Entry<InetAddress, Long> entry = it.next();
+                            if (System.currentTimeMillis() - entry.getValue() > ANNOUNCE_INTERVAL * MAX_TIME_PREVIOUS_ANNOUNCE) {
+                                it.remove();
+                            }
+                        }
+                    }
                 } catch (IOException e) {
                     e.printStackTrace();
                 }
