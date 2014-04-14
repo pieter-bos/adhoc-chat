@@ -18,4 +18,8 @@ public class Conversation {
         this.user = user;
         this.messages = new LinkedList<>();
     }
+
+    public String getUser() {
+        return user;
+    }
 }

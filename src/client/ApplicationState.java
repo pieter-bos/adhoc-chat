@@ -1,9 +1,13 @@
 package client;
 
 import client.protocol.TextMessage;
+import com.google.gson.Gson;
 
+import java.net.InetAddress;
+import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Map;
 
 /**
  * Keeps track of the complete state of the client
@@ -14,7 +18,7 @@ public class ApplicationState {
 
     private String nickname;
     private ClientAddressMapper users;
-    private List<Conversation> conversationList;
+    private Map<Integer, Conversation> conversationList;
 
     public String getNickname() {
         return nickname;
@@ -32,7 +36,7 @@ public class ApplicationState {
      */
     public ApplicationState() {
         users = new ClientAddressMapper();
-        conversationList = new LinkedList<>();
+        conversationList = new HashMap<>();
     }
 
     public void setHandlers(ClientHandler client, NetworkHandler network) {
@@ -41,6 +45,8 @@ public class ApplicationState {
     }
 
     public void sendMessage(TextMessage message) {
-//        network.broadcast(message);
+        Conversation conv = this.conversationList.get(message.getConvId());
+        InetAddress dest = this.users.get(conv.getUser());
+        network.send(new Gson().toJson(message).getBytes(), dest);
     }
 }

@@ -17,4 +17,16 @@ public class TextMessage extends Message {
         this.nickname = nickname;
         this.convId = convId;
     }
+
+    public int getConvId() {
+        return convId;
+    }
+
+    public String getNickname() {
+        return nickname;
+    }
+
+    public String getMessage() {
+        return message;
+    }
 }
