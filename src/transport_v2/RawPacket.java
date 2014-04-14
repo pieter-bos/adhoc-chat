@@ -6,7 +6,7 @@ import java.net.InetAddress;
 import java.net.UnknownHostException;
 import java.nio.ByteBuffer;
 
-public class RawPacket {
+public class RawPacket implements Comparable<RawPacket> {
     public static final int MIN_SIZE = 21;
 
     public static final byte ACK_MASK =      0b00000001;
@@ -214,7 +214,7 @@ public class RawPacket {
     public static RawPacket newAnnounce(InetAddress sourceAddress) {
         try {
             return new RawPacket(newNonce(), ANNOUNCE_MASK, 0, 0, sourceAddress.getAddress(), BROADCAST_ADDRESS);
-        } catch (InvalidPacketException e) {
+        } catch(InvalidPacketException e) {
             return null;
         }
     }
@@ -222,7 +222,7 @@ public class RawPacket {
     public static RawPacket newSynchronization(int sequenceNumber, InetAddress sourceAddress, InetAddress destinationAddress) {
         try {
             return new RawPacket(newNonce(), SYN_MASK, sequenceNumber, 0, sourceAddress, destinationAddress);
-        } catch (InvalidPacketException e) {
+        } catch(InvalidPacketException e) {
             return null;
         }
     }
@@ -230,7 +230,7 @@ public class RawPacket {
     public static RawPacket newSynAck(int sequenceNumber, int ackNumber, InetAddress sourceAddress, InetAddress destinationAddress) {
         try {
             return new RawPacket(newNonce(), (byte) (SYN_MASK | ACK_MASK), sequenceNumber, ackNumber, sourceAddress, destinationAddress);
-        } catch (InvalidPacketException e) {
+        } catch(InvalidPacketException e) {
             return null;
         }
     }
@@ -240,6 +240,52 @@ public class RawPacket {
             return new RawPacket(newNonce(), (byte) 0, sequenceNumber, 0, sourceAddress, destinationAddress, data);
         } catch(InvalidPacketException e) {
             return null;
+        }
+    }
+
+    public static RawPacket newAcknowledgement(int acknowledgmentNumber, InetAddress sourceAddress, InetAddress destinationAddress) {
+        try {
+            return new RawPacket(newNonce(), ACK_MASK, 0, acknowledgmentNumber, sourceAddress, destinationAddress);
+        } catch(InvalidPacketException e) {
+            return null;
+        }
+    }
+
+    public RawPacket duplicate() {
+        try {
+            return new RawPacket(newNonce(), flags, sequenceNumber, acknowledgmentNumber, sourceAddress, destinationAddress, data);
+        } catch(InvalidPacketException e) {
+            return null;
+        }
+    }
+
+    @Override
+    public int compareTo(RawPacket rawPacket) {
+        long thisNum = getSequenceNumber();
+        long otherNum = rawPacket.getSequenceNumber();
+
+        if(thisNum == otherNum) {
+            return 0;
+        }
+
+        if(otherNum < thisNum) {
+            otherNum += 1L << 32;
+        }
+
+        long incrementSteps = otherNum - thisNum;
+
+        otherNum = rawPacket.getSequenceNumber();
+
+        if(otherNum > thisNum) {
+            otherNum -= 1L << 32;
+        }
+
+        long decrementSteps = thisNum - otherNum;
+
+        if(incrementSteps > decrementSteps) {
+            return -1;
+        } else {
+            return 1;
         }
     }
 }

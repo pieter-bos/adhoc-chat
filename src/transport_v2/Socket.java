@@ -1,7 +1,5 @@
 package transport_v2;
 
-import transport.Packet;
-
 import java.io.IOException;
 import java.net.InetAddress;
 

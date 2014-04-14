@@ -1,7 +1,5 @@
 package transport_v2;
 
-import transport.Packet;
-
 import java.io.IOException;
 import java.net.*;
 import java.util.*;
@@ -9,7 +7,9 @@ import java.util.concurrent.LinkedBlockingQueue;
 
 public class SocketImpl implements Socket {
     private static final long ANNOUNCE_INTERVAL = 30 * 1000;
-    private static final int MAX_TIME_PREVIOUS_ANNOUNCE = 3;
+    private static final int MAX_ANNOUNCE_DROP_COUNT = 3;
+    private static final long RETRANSMIT_INTERVAL = 1 * 1000;
+    private static final int MAX_RETRANSMIT_COUNT = 5;
     private static String GROUP = "244.244.244.244";
 
     private final InetAddress ip;
@@ -19,7 +19,9 @@ public class SocketImpl implements Socket {
     private final ReceiverThread receiverThread;
 
     private final HashMap<InetAddress, Long> timeLastAnnounceReceived = new HashMap<>();
-
+    private final HashMap<InetAddress, Integer> lastUsedSequenceNumber = new HashMap<>();
+    private final HashMap<InetAddress, HashSet<RawPacket>> sentButNoAck = new HashMap<>();
+    private final HashSet<InetAddress> network = new HashSet<>();
 
     public SocketImpl(int port) throws IOException {
         InetAddress ip = null;
@@ -47,7 +49,10 @@ public class SocketImpl implements Socket {
 
         receiverThread = new ReceiverThread(transport, this);
 
-
+        receiverThread.addPacketListener(new AnnounceHandler(this, timeLastAnnounceReceived));
+        receiverThread.addPacketListener(new SynchronizationHandler(this));
+        receiverThread.addPacketListener(new BroadcastHandler(this));
+        receiverThread.addPacketListener(new DataHandler(this, receiveQueue));
 
         receiverThread.start();
     }
@@ -67,7 +72,7 @@ public class SocketImpl implements Socket {
                         Iterator<Map.Entry<InetAddress, Long>> it = timeLastAnnounceReceived.entrySet().iterator();
                         while (it.hasNext()) {
                             Map.Entry<InetAddress, Long> entry = it.next();
-                            if (System.currentTimeMillis() - entry.getValue() > ANNOUNCE_INTERVAL * MAX_TIME_PREVIOUS_ANNOUNCE) {
+                            if (System.currentTimeMillis() - entry.getValue() > ANNOUNCE_INTERVAL * MAX_ANNOUNCE_DROP_COUNT) {
                                 it.remove();
                             }
                         }
@@ -88,6 +93,43 @@ public class SocketImpl implements Socket {
 
     protected void send(RawPacket packet) throws IOException {
         transport.send(new DatagramPacket(packet.getBytes(), packet.getLength()));
+    }
+
+    protected void sendAndAwaitAck(RawPacket packet) throws IOException {
+        sendAndRetry(packet, MAX_RETRANSMIT_COUNT);
+    }
+
+    protected void sendAndRetry(RawPacket packet, int retries) throws IOException {
+        if(retries <= 0) {
+            removeFromNetwork(packet.getDestinationIp());
+            return;
+        }
+
+        send(packet);
+
+        if(!sentButNoAck.containsKey(packet.getDestinationIp())) {
+            sentButNoAck.put(packet.getDestinationIp(), new HashSet<RawPacket>());
+        }
+
+        new Timer().schedule(new AckAwaitTimerTask(this, packet, sentButNoAck.get(packet.getDestinationIp()), retries), RETRANSMIT_INTERVAL);
+    }
+
+    protected void removeFromNetwork(InetAddress ip) {
+        synchronized(sentButNoAck) {
+            sentButNoAck.remove(ip);
+        }
+
+        synchronized(lastUsedSequenceNumber) {
+            lastUsedSequenceNumber.remove(ip);
+        }
+
+        synchronized(timeLastAnnounceReceived) {
+            timeLastAnnounceReceived.remove(ip);
+        }
+
+        synchronized(network) {
+            network.remove(ip);
+        }
     }
 
     @Override
@@ -111,10 +153,25 @@ public class SocketImpl implements Socket {
 
     @Override
     public Iterable<InetAddress> getOtherClients() {
+        // TODO implement
+        return null;
+    }
 
+    protected int newSequenceNumber(InetAddress destination) {
+        if(!lastUsedSequenceNumber.containsKey(destination)) {
+            lastUsedSequenceNumber.put(destination, 0);
+        }
+
+        int result = lastUsedSequenceNumber.get(destination);
+        lastUsedSequenceNumber.put(destination, result + 1);
+        return result;
     }
 
     public InetAddress getIp() {
         return ip;
+    }
+
+    public void addToNetwork(InetAddress ip, int sequenceNumber) {
+        network.add(ip);
     }
 }
