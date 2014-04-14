@@ -1,0 +1,29 @@
+\documentclass{report}
+\title{Link Layer Specification}
+\begin{document}
+    \maketitle
+
+    \section{Packets}
+    \subsection{Structure of all packets}
+    The following list describes the structure of all packets. All bytes are sent in sequence as a single UDP datagram packet.
+
+    \begin{enumerate}
+        \item ID: A nonce that is unique per source ip address. (4 bytes)
+        \item Flags: 8 Bits of flags. (1 byte)
+        \item Sequence number: The sequence number of the packet, measured in number of packets, if applicable. (4 bytes)
+        \item Acknowledgement number: The last acknowledged packet, if applicable. (4 bytes)
+        \item Source IP: The IPv4 source of this packet. (4 bytes)
+        \item Destination IP: The IPv4 destination of this packet. (4 bytes)
+        \item Data: The data of this packet, if applicable. (n bytes)
+    \end{enumerate}
+    \subsection{Announce}
+    This is the first packet that is sent when a client is booted. This packet simultaneously indicates to other clients that it intends to join the network and asks these other clients to send a synchronization.
+    \subsection{Synchronization}
+    This is a response to an announce. When an announce is received, the client responds with a synchronization with the source of the annouce as the destination. In the synchronization the SEQ flag and the sequence number is set, to indicate what the next sequence number is the client will send.
+    \subsection{Synchronization and Acknowledgement}
+    This is a response to a sychronization. In this packet the SEQ flag, ACK flag, sequence number and acknowledgement number are set, to indicate which Synchronization is Acked and what the next sequence number is that the client will send.
+    \subsection{Acknowledgement}
+    This is a response to any packet that has a sequence number. This is equivalent to making it a response to any packet that is not an Acknowledgement.
+    \subsection{Data}
+    This is a packet with data for the application layer. Data is only allowed in packets that are neither a Synchronization nor an Acknowledgement.
+\end{document}
