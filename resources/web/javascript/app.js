@@ -29,7 +29,12 @@ var chat = angular.module('chat', [])
     }
 
     this.sendMessage = function(message, convId) {
-        this.socket.sendMessage(message, convId, function(e) { console.log(e); });
+        console.log(convId);
+        this.socket.sendMessage(message, convId, function(e) {
+            var m = JSON.parse(e);
+            console.log(m);
+            $rootScope.$broadcast('websocketService::newMessage', m.convId, m.message, m.nickname);
+        });
     }
 })
 // Provides application settings
@@ -57,6 +62,7 @@ var chat = angular.module('chat', [])
 })
 // Provides function to manipulate conversation model
 .service('conversationModel', function($rootScope, websocketService) {
+    var self = this;
     this.conversations = [new Conversation('Everyone', false)];
 
     // Adds a new conversation to the list and makes all other conversations inactive
@@ -88,6 +94,19 @@ var chat = angular.module('chat', [])
         this.addConversation(newConv);
         $rootScope.$broadcast('conversationModel::conversationsChanged');
     }
+
+    $rootScope.$on('websocketService::newMessage', function(event, id, message, nickname) {
+        console.log(self);
+
+        for (var i = 0; i < self.conversations.length; i++) {
+            if (self.conversations[i].id === id) {
+                self.conversations[i].messages.push({name: nickname, value: message});
+                console.log(self.conversations[i]);
+            }
+        }
+
+        $rootScope.$broadcast('conversationModel::conversationsChanged');
+    });
 })
 // Controller for application settings
 .controller('settingController', function($scope, settingService) {
@@ -129,5 +148,6 @@ var chat = angular.module('chat', [])
 
     $scope.$on('conversationModel::conversationsChanged', function() {
         $scope.conversations = conversationModel.conversations;
+        $scope.$apply();
     });
 });

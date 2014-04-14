@@ -46,14 +46,9 @@ public class ClientHandler implements WebSocketJsonRpcHandler {
     }
 
     @Expose
-    public String sendMessage(final String data, final int convId) {
-        TextMessage message = new TextMessage(data);
+    public String sendMessage(String data, int convId) {
+        TextMessage message = new TextMessage(data, state.getNickname(), convId);
         state.sendMessage(message);
-
-        return new Gson().toJson(new Object() {
-            public int id = convId;
-            public String nickname = state.getNickname();
-            public String message = data;
-        });
+        return new Gson().toJson(message);
     }
 }
