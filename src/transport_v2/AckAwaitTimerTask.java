@@ -22,7 +22,7 @@ public class AckAwaitTimerTask extends TimerTask {
         boolean acked;
 
         synchronized(sentButNoAck) {
-            acked = sentButNoAck.contains(packet);
+            acked = !sentButNoAck.contains(packet);
         }
 
         if(!acked) {
