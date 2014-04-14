@@ -45,7 +45,10 @@ public class RawPacket {
                 destinationAddress[i] = bb.get();
             }
 
-            data = bb.slice().array();
+            data = new byte[bb.remaining()];
+            while (bb.remaining() > 0) {
+                data[data.length - bb.remaining()] = bb.get();
+            }
         }
     }
 
@@ -200,6 +203,9 @@ public class RawPacket {
         result += ", ack=" + getAcknowledgmentNumber();
         result += ", rtns=" + getRetransmissionNumber();
         result += ", len=" + data.length;
+
+        result += ", src=" + getSourceIp();
+        result += ", dst=" + getDestinationIp();
 
         return result;
     }

@@ -30,15 +30,19 @@ public class SocketImpl implements Socket {
     protected static final int MAX_RETRANSMITS = 5;
 
     /** The <code>MulticastSocket</code> used. */
-    private MulticastSocket mulSocket;
+    private final MulticastSocket mulSocket;
 
     /** Indicates if a connection is established and first syn send. */
     private boolean connected = false;
 
     /** The multicast group to join */
-    private InetAddress group;
+    private final InetAddress group;
+
     /** The port number used. */
-    private int port;
+    private final int port;
+
+    /** The IP used as source to send packets. */
+    private final InetAddress myIP;
 
     /** Instance of <code>ReceiverThread</code> used. */
     private ReceiverThread receiverThread;
@@ -61,6 +65,11 @@ public class SocketImpl implements Socket {
     /** Sequence numbers of send packets per destination for which no acknowledgement had been received. */
     private HashMap<InetAddress, HashSet<Integer>> unAckedSendPackets = new HashMap<>();
 
+    /**
+     * Hashes of send and already forwarded packets.
+     */
+    private final HashSet<Integer> sendPackets = new HashSet<>();
+
 
     /**
      * Create a new socket and bind it to a specific port.
@@ -71,10 +80,34 @@ public class SocketImpl implements Socket {
         this.port = port;
         this.group = InetAddress.getByName(GROUP);
 
-        mulSocket = new MulticastSocket(new InetSocketAddress(InetAddress.getLocalHost(), port));
-        mulSocket.joinGroup(group);
+        InetAddress ip = null;
+        NetworkInterface netIF = null;
 
-        receiverThread = new ReceiverThread(mulSocket);
+        Enumeration<NetworkInterface> interfaces = NetworkInterface.getNetworkInterfaces();
+        while (interfaces.hasMoreElements() && ip == null){
+            NetworkInterface ni = interfaces.nextElement();
+            if (ni.isUp() && !ni.isLoopback() && ni.supportsMulticast()) {
+                Enumeration<InetAddress> addresses = ni.getInetAddresses();
+                while (addresses.hasMoreElements() && ip == null) {
+                    InetAddress address = addresses.nextElement();
+                    if (address instanceof Inet4Address) {
+                        ip = address;
+                        netIF = ni;
+                    }
+                }
+            }
+        }
+
+        myIP = ip;
+
+        System.out.println("IP: " + myIP);
+        System.out.println("Port: " + port);
+        System.out.println("Interface: " + netIF);
+
+        mulSocket = new MulticastSocket(port);
+        mulSocket.joinGroup(new InetSocketAddress(group, port), netIF);
+
+        receiverThread = new ReceiverThread(mulSocket, this);
 
         receiverThread.addPacketListener(new PacketListener() {
             @Override
@@ -90,11 +123,11 @@ public class SocketImpl implements Socket {
     }
 
     /**
-     * Gets the local address to which the socket is bound.
-     * @return the local address to which the socket is bound
+     * Gets the local address which should be used as source address when sending packets.
+     * @return the local address
      */
     public InetAddress getAddress() {
-        return ((InetSocketAddress)(mulSocket.getLocalSocketAddress())).getAddress();
+        return myIP;
     }
 
     @Override
@@ -130,10 +163,9 @@ public class SocketImpl implements Socket {
         Condition condition = lock.newCondition();
 
         SynAckHandler handler = new SynAckHandler(lock, condition, candidates, verified);
+        receiverThread.addPacketListener(handler);
         while(tries < MAX_TRIES && (!candidates.equals(verified) || verified.size() == 0)) {
             lock.lock();
-            receiverThread.addPacketListener(handler);
-
 
             try {
                 send(new RawPacket(RawPacket.SYN_MASK, 0, 0, (int) System.currentTimeMillis(),
@@ -144,11 +176,11 @@ public class SocketImpl implements Socket {
                 condition.await(SYN_TIMEOUT, SYN_TIMEOUT_UNIT);
             } catch (InterruptedException e) {  }
 
-            receiverThread.removePacketListener(handler);
             lock.unlock();
 
             tries++;
         }
+        receiverThread.removePacketListener(handler);
 
         network = (HashSet<InetAddress>) verified.clone();
     }
@@ -159,6 +191,7 @@ public class SocketImpl implements Socket {
      * @param packet the <code>RawPacket</code> to send.
      */
     protected synchronized void send(RawPacket packet) {
+        sendPackets.add(packet.hashCode());
         System.out.println("send " + packet);
         DatagramPacket datagram = new DatagramPacket(packet.getBytes(), packet.getLength(), group, port);
 
@@ -287,9 +320,16 @@ public class SocketImpl implements Socket {
      */
     public int getSequenceNumber(InetAddress destinationIp) {
         synchronized (sendLastSequenceNumbers) {
-            int result = sendLastSequenceNumbers.get(destinationIp);
-            sendLastSequenceNumbers.put(destinationIp, result + 1);
-            return result;
+            if (destinationIp != null) {
+                if (sendLastSequenceNumbers.containsKey(destinationIp)) {
+                    int result = sendLastSequenceNumbers.get(destinationIp);
+                    sendLastSequenceNumbers.put(destinationIp, result + 1);
+                    return result;
+                } else {
+                    sendLastSequenceNumbers.put(destinationIp, 1);
+                }
+            }
+            return 0;
         }
     }
 
@@ -327,5 +367,14 @@ public class SocketImpl implements Socket {
         synchronized (unAckedSendPackets) {
             unAckedSendPackets.remove(ip);
         }
+    }
+
+    /**
+     * Check whether the given packet has (already) been send/forwarded.
+     * @param packet the packet to check
+     * @return
+     */
+    protected boolean hasSend(RawPacket packet) {
+        return sendPackets.contains(packet.hashCode());
     }
 }

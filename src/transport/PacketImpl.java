@@ -35,4 +35,16 @@ public class PacketImpl implements Packet {
     public int length() {
         return data.length;
     }
+
+    @Override
+    public String toString() {
+        String result = "";
+
+        result += "src=" + source.toString();
+        result += ", dst=" + destination.toString();
+        result += ", len=" + length();
+        result += ", data:" + new String(data);
+
+        return result;
+    }
 }

@@ -26,8 +26,7 @@ public class SynHandler implements PacketListener {
 
             try {
                 socket.send(new RawPacket((byte)(RawPacket.SYN_MASK | RawPacket.ACK_MASK),
-                        socket.getSequenceNumber(packet.getSourceIp()),
-                        packet.getSequenceNumber(), 0,
+                        0, packet.getSequenceNumber(), (int) System.currentTimeMillis(),
                         socket.getAddress(), packet.getSourceIp()));
             } catch (InvalidPacketException e) {  }
         }

@@ -1,5 +1,6 @@
 package client.cli;
 
+import transport.Packet;
 import transport.Socket;
 import transport.SocketImpl;
 
@@ -7,14 +8,25 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
 
-public class Main {
+public class Main extends Thread {
 
     private Socket socket;
 
     public Main(Socket socket) {
         this.socket = socket;
+    }
+
+    @Override
+    public void run() {
         socket.broadcast("test".getBytes());
         socket.broadcast(new byte[] {1, 2, 3});
+
+        while (true) {
+            System.out.println("waiting for packet");
+            Packet packet = socket.receive();
+            System.out.println("packet received");
+            System.out.println(packet.toString());
+        }
     }
 
     /**
@@ -52,7 +64,7 @@ public class Main {
             socket = new SocketImpl(1234);
             socket.connect();
             if (socket.isConnected()) {
-                new Main(socket);
+                new Main(socket).start();
             } else {
                 System.out.println("Could not connect :(");
             }

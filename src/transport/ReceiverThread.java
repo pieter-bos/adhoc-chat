@@ -2,16 +2,21 @@ package transport;
 
 import java.io.IOException;
 import java.net.DatagramPacket;
+import java.net.InetAddress;
+import java.net.InetSocketAddress;
 import java.net.MulticastSocket;
+import java.util.Arrays;
 import java.util.HashSet;
 import java.util.Set;
 
 public class ReceiverThread extends Thread {
     private MulticastSocket mulSocket;
-    private Set<PacketListener> packetListeners = new HashSet<PacketListener>();
+    private SocketImpl socket;
+    private HashSet<PacketListener> packetListeners = new HashSet<>();
 
-    public ReceiverThread(MulticastSocket socket) {
-        mulSocket = socket;
+    public ReceiverThread(MulticastSocket mulSocket, SocketImpl socket) {
+        this.mulSocket = mulSocket;
+        this.socket = socket;
     }
 
     public void addPacketListener(PacketListener listener) {
@@ -27,6 +32,7 @@ public class ReceiverThread extends Thread {
     }
 
     @Override
+    @SuppressWarnings("unchecked") // ignore unchecked casts after clone().
     public void run() {
         byte[] buf = new byte[1<<16];
         try {
@@ -34,13 +40,17 @@ public class ReceiverThread extends Thread {
                 DatagramPacket datagramPacket = new DatagramPacket(buf, buf.length);
                 mulSocket.receive(datagramPacket);
 
-                RawPacket rawPacket = RawPacket.tryParse(datagramPacket.getData());
+                byte[] packet = Arrays.copyOfRange(datagramPacket.getData(), 0, datagramPacket.getLength());
 
-                if (rawPacket != null) {
+                RawPacket rawPacket = RawPacket.tryParse(packet);
+
+                if (rawPacket != null && !socket.hasSend(rawPacket)) {
+                    HashSet<PacketListener> listeners;
                     synchronized (packetListeners) {
-                        for (PacketListener listener : packetListeners) {
-                            listener.onPacketReceived(rawPacket);
-                        }
+                        listeners = (HashSet<PacketListener>) packetListeners.clone();
+                    }
+                    for (PacketListener listener : listeners) {
+                        listener.onPacketReceived(rawPacket);
                     }
                 }
             }
