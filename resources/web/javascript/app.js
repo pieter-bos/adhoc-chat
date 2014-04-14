@@ -20,9 +20,14 @@ function Conversation(user, removable) {
 var chat = angular.module('chat', [])
 // Provides functions for websocket communication
 .service('websocketService', function($rootScope) {
+    var self = this;
     this.socket = new WebSocketJSONRPC("ws://localhost:8081/")
+        .def('getConversations')
         .def('updateNickname')
-        .def('sendMessage');
+        .def('sendMessage')
+        .def('subscribe');
+
+    this.socket.subscribe('newConversation');
 
     this.updateNickname = function(nickname) {
         this.socket.updateNickname(nickname, function(e) { console.log(e); });
@@ -36,6 +41,16 @@ var chat = angular.module('chat', [])
             $rootScope.$broadcast('websocketService::newMessage', m.convId, m.message, m.nickname);
         });
     }
+
+    this.socket.on('newConversation', function(data) {
+        console.log('new:');
+    });
+
+    this.socket.on('open', function() {
+        self.socket.getConversations(function(e) {
+            $rootScope.$broadcast('websocketService::newConversation', e);
+        });
+    });
 })
 // Provides application settings
 .service('settingService', function($rootScope, websocketService) {
@@ -63,7 +78,7 @@ var chat = angular.module('chat', [])
 // Provides function to manipulate conversation model
 .service('conversationModel', function($rootScope, websocketService) {
     var self = this;
-    this.conversations = [new Conversation('Everyone', false)];
+    this.conversations = [];
 
     // Adds a new conversation to the list and makes all other conversations inactive
     this.addConversation = function(conv) {
@@ -104,6 +119,17 @@ var chat = angular.module('chat', [])
                 console.log(self.conversations[i]);
             }
         }
+
+        $rootScope.$broadcast('conversationModel::conversationsChanged');
+    });
+
+    $rootScope.$on('websocketService::newConversation', function(event, data) {
+        var removable = data.user === undefined ? false : true;
+        var user = data.user === undefined ? 'Everyone' : data.user;
+        var conv = new Conversation(user, removable);
+        conv.id = data.id;
+        conv.messages = data.messages;
+        self.conversations.push(conv);
 
         $rootScope.$broadcast('conversationModel::conversationsChanged');
     });

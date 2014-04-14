@@ -5,10 +5,7 @@ import client.protocol.TextMessage;
 import com.google.gson.Gson;
 
 import java.net.InetAddress;
-import java.util.HashMap;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 /**
  * Keeps track of the complete state of the client
@@ -36,6 +33,8 @@ public class ApplicationState {
     public ApplicationState() {
         users = new ClientAddressMapper();
         conversationList = new HashMap<>();
+        int id = new Random().nextInt(10000);
+        conversationList.put(id, new Conversation("", id));
     }
 
     public void setHandlers(ClientHandler client, NetworkHandler network) {
@@ -58,10 +57,16 @@ public class ApplicationState {
         Conversation conv = conversationList.get(message.getConvId());
 
         if (conv == null) {
-            conversationList.put(message.getConvId(), new Conversation(message.getNickname(), message.getConvId()));
+            Conversation newConv = new Conversation(message.getNickname(), message.getConvId());
+            conversationList.put(message.getConvId(), newConv);
+            client.newConversation(newConv);
             conv = conversationList.get(message.getConvId());
         }
 
         conv.addMessage(new TextMessage(message.getMessage(), user, conv.getId()));
+    }
+
+    public Map<Integer, Conversation> getConversationList() {
+        return conversationList;
     }
 }

@@ -51,4 +51,13 @@ public class ClientHandler implements WebSocketJsonRpcHandler {
         state.sendMessage(message);
         return new Gson().toJson(message);
     }
+
+    @Expose
+    public String getConversations() {
+        return new Gson().toJson(state.getConversationList().values());
+    }
+
+    public void newConversation(Conversation newConv) {
+        rpc.notify("newConversation", newConv);
+    }
 }
