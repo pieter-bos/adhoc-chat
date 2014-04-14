@@ -261,28 +261,7 @@ public class RawPacket implements Comparable<RawPacket> {
 
     @Override
     public int compareTo(RawPacket rawPacket) {
-        long thisNum = getSequenceNumber();
-        long otherNum = rawPacket.getSequenceNumber();
-
-        if(thisNum == otherNum) {
-            return 0;
-        }
-
-        if(otherNum < thisNum) {
-            otherNum += 1L << 32;
-        }
-
-        long incrementSteps = otherNum - thisNum;
-
-        otherNum = rawPacket.getSequenceNumber();
-
-        if(otherNum > thisNum) {
-            otherNum -= 1L << 32;
-        }
-
-        long decrementSteps = thisNum - otherNum;
-
-        if(incrementSteps > decrementSteps) {
+        if(Util.differenceWithWrapAround(getSequenceNumber(), rawPacket.getSequenceNumber()) < 1) {
             return -1;
         } else {
             return 1;
