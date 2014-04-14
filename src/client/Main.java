@@ -8,19 +8,20 @@ import java.net.InetSocketAddress;
  */
 public class Main {
     private ApplicationState state;
-    private ClientHandler client;
+    private ClientHandler client = null;
     private NetworkHandler network;
 
     /**
      * Constructor
      */
     public Main() {
-        final WebSocketJsonRpc<ClientHandler> rpc = new WebSocketJsonRpc<ClientHandler>(new InetSocketAddress(8081), client, ClientHandler.class);
         network = new NetworkHandler(3000, state);
-        client = new ClientHandler(state, rpc);
-        state = new ApplicationState();
+        client = new ClientHandler(state);
+        final WebSocketJsonRpc<ClientHandler> rpc = new WebSocketJsonRpc<ClientHandler>(new InetSocketAddress(8081), client, ClientHandler.class);
+        client.setSocket(rpc);
 
         rpc.start();
+        state = new ApplicationState(client, network);
     }
 
     public static void main(String[] args) {

@@ -1,5 +1,6 @@
 package client;
 
+import client.wsjsonrpc.Expose;
 import client.wsjsonrpc.WebSocketJsonRpc;
 import client.wsjsonrpc.WebSocketJsonRpcHandler;
 import org.java_websocket.WebSocket;
@@ -12,8 +13,11 @@ public class ClientHandler implements WebSocketJsonRpcHandler {
     private ApplicationState state;
     private WebSocketJsonRpc<ClientHandler> rpc;
 
-    public ClientHandler(ApplicationState state, WebSocketJsonRpc<ClientHandler> rpc) {
+    public ClientHandler(ApplicationState state) {
         this.state = state;
+    }
+
+    public void setSocket(WebSocketJsonRpc<ClientHandler> rpc) {
         this.rpc = rpc;
     }
 
@@ -29,6 +33,14 @@ public class ClientHandler implements WebSocketJsonRpcHandler {
 
     @Override
     public void onError(WebSocket webSocket, Exception e) {
-    //TODO implement
+        System.out.println(e.getMessage());
+    }
+
+    @Expose
+    public boolean updateNickname(String nickname) {
+        System.out.println("Update nickname: " + nickname);
+        state.setNickname(nickname);
+
+        return true;
     }
 }

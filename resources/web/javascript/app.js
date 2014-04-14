@@ -26,13 +26,19 @@ function Conversation(user, removable) {
 var chat = angular.module('chat', [])
 // Provides functions for websocket communication
 .service('websocketService', function($rootScope) {
+    this.socket = new WebSocketJSONRPC("ws://localhost:8081/")
+        .def('updateNickname');
 
+    this.updateNickname = function(nickname) {
+        this.socket.updateNickname(nickname, function(e) { console.log(e) });
+    }
 })
 // Provides application settings
-.service('settingService', function($rootScope) {
+.service('settingService', function($rootScope, websocketService) {
     this.nickname = 'choose a nickname...';
 
     this.updateNickname = function(nickname) {
+        websocketService.updateNickname(nickname);
         this.nickname = nickname;
         $rootScope.$broadcast('settingService::nicknameChanged');
     }
