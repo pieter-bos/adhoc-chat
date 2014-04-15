@@ -50,6 +50,8 @@ var chat = angular.module('chat', [])
     });
 
     this.socket.on('open', function() {
+        $rootScope.$broadcast('websocketService::connected');
+
         self.socket.getConversations(function(e) {
             $rootScope.$broadcast('websocketService::newConversation', e);
         });
@@ -148,6 +150,7 @@ var chat = angular.module('chat', [])
 })
 // Controller for application settings
 .controller('settingController', function($scope, settingService) {
+    $scope.connected = false;
     $scope.nickname = settingService.nickname;
 
     $scope.nicknameField = '';
@@ -161,6 +164,12 @@ var chat = angular.module('chat', [])
         $('#nick-modal').modal('hide');
         $scope.nickname = nickname;
         $scope.$apply();
+    });
+
+    $scope.$on('websocketService::connected', function() {
+        $scope.connected = true;
+        $scope.$apply();
+        console.log($scope.connected);
     });
 })
 // Controller for user related views
