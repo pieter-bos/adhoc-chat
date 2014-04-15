@@ -36,7 +36,7 @@ public class SocketImpl implements Socket {
         Enumeration<NetworkInterface> interfaces = NetworkInterface.getNetworkInterfaces();
         while (interfaces.hasMoreElements() && ip == null){
             NetworkInterface ni = interfaces.nextElement();
-            if (ni.isUp() && !ni.isLoopback() && ni.supportsMulticast()) {
+            if (!ni.isLoopback() && ni.supportsMulticast()) {
                 Enumeration<InetAddress> addresses = ni.getInetAddresses();
                 while (addresses.hasMoreElements() && ip == null) {
                     InetAddress address = addresses.nextElement();
