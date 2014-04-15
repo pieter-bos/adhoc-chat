@@ -64,6 +64,10 @@ public class NetworkHandler extends Thread {
                     RequestNickMessage requestNickMessage = new Gson().fromJson(packetData, RequestNickMessage.class);
                     state.requestNick(requestNickMessage, packet.getSourceAddress());
                     break;
+                case LeaveConversationMessage.TYPE:
+                    LeaveConversationMessage leaveConversationMessage = new Gson().fromJson(packetData, LeaveConversationMessage.class);
+                    state.leaveConversation(leaveConversationMessage);
+                    break;
             }
         }
     }

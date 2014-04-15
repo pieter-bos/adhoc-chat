@@ -122,4 +122,22 @@ public class ApplicationState {
     public void requestNick(RequestNickMessage requestNickMessage, InetAddress sourceAddress) {
         network.send(new Gson().toJson(new NickChangeMessage(getNickname())).getBytes(), sourceAddress);
     }
+
+    /**
+     * Notify the other user of the intent of leaving the conversation.
+     * @param convId The conversation id
+     */
+    public void leaveConversation(int convId) {
+        Conversation conversation = conversationList.get(convId);
+        network.send(new Gson().toJson(new LeaveConversationMessage(convId)).getBytes(), users.get(conversation.getUser()));
+        conversationList.remove(convId);
+    }
+
+    /**
+     * Notify the client that the conversation should be closed
+     * @param leaveConversationMessage The received <code>LeaveConversationMessage</code>
+     */
+    public void leaveConversation(LeaveConversationMessage leaveConversationMessage) {
+        client.leaveConversation(leaveConversationMessage);
+    }
 }

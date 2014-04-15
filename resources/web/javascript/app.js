@@ -27,7 +27,8 @@ var chat = angular.module('chat', [])
         .def('updateNickname')
         .def('sendMessage')
         .def('subscribe')
-        .def('addConversation');
+        .def('addConversation')
+        .def('leaveConversation');
 
 
     this.updateNickname = function(nickname) {
@@ -49,6 +50,10 @@ var chat = angular.module('chat', [])
         this.socket.addConversation(conversation.user, function() {});
     }
 
+    this.leaveConversation = function(conv) {
+        this.socket.leaveConversation(conv.id, function() {});
+    }
+
     this.socket.on('newConversation', function(user, messages, id) {
         $rootScope.$broadcast('websocketService::newConversation', { user: user, messages: messages, id: id });
     });
@@ -63,6 +68,10 @@ var chat = angular.module('chat', [])
 
     this.socket.on('newMessage', function(conv, user, message) {
         $rootScope.$broadcast('websocketService::newMessage', conv, message, user);
+    });
+
+    this.socket.on('leaveConversation', function(conv) {
+        $rootScope.$broadcast('websocketService::leaveConversation', conv);
     });
 
     this.socket.on('error', function(error) {
@@ -143,6 +152,7 @@ var chat = angular.module('chat', [])
     this.removeConversation = function(conv) {
         this.conversations.splice(this.conversations.indexOf(conv), 1);
         this.conversations[0].active = 'active';
+        websocketService.leaveConversation(conv);
         $rootScope.$broadcast('conversationModel::conversationsChanged');
     }
 
@@ -179,6 +189,10 @@ var chat = angular.module('chat', [])
         self.addConversation(conv);
 
         $rootScope.$broadcast('conversationModel::conversationsChanged');
+    });
+
+    $rootScope.$on('websocketService::leaveConversation', function(event, convId) {
+        self.removeConversation(convId);
     });
 })
 // Controller for application settings
