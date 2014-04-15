@@ -59,7 +59,7 @@ public class ApplicationState {
     }
 
     public void addUser(NickChangeMessage message, InetAddress source) {
-        users.put(message.getNick(), source);
+        users.put(message.getUsername(), source);
         client.newUser(message);
     }
 

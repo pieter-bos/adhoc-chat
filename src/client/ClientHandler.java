@@ -70,6 +70,6 @@ public class ClientHandler implements WebSocketJsonRpcHandler {
     }
 
     public void newUser(NickChangeMessage message) {
-        rpc.notify("newUser", message.getNick());
+        rpc.notify("newUser", message.getUsername());
     }
 }

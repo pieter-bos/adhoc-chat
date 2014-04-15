@@ -4,17 +4,17 @@ package client.protocol;
  * Broadcasted by client to notify others of it's presence on the network
  */
 public class NickChangeMessage extends Message {
-    private String nick;
+    private String username;
 
     /**
      * Constructor
      * @param nick Nickname of this client
      */
     public NickChangeMessage(String nick) {
-        this.nick = nick;
+        this.username = nick;
     }
 
-    public String getNick() {
-        return nick;
+    public String getUsername() {
+        return username;
     }
 }
