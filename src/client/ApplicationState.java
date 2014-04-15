@@ -8,7 +8,6 @@ import com.google.gson.Gson;
 import java.net.InetAddress;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.Random;
 
 /**
  * Keeps track of the complete state of the client
@@ -41,7 +40,7 @@ public class ApplicationState {
     public ApplicationState() {
         users = new ClientAddressMapper();
         conversationList = new HashMap<>();
-        int id = new Random().nextInt(10000);
+        int id = -1;
         conversationList.put(id, new Conversation("", id));
     }
 
@@ -75,6 +74,8 @@ public class ApplicationState {
         }
 
         conv.addMessage(new TextMessage(message.getMessage(), user, conv.getId()));
+
+        client.newMessage(conv, message.getNickname(), message.getMessage());
     }
 
     public Map<Integer, Conversation> getConversationList() {
