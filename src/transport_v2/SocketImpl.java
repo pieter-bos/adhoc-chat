@@ -8,7 +8,7 @@ import java.util.concurrent.LinkedBlockingQueue;
 public class SocketImpl implements Socket {
     private static final long ANNOUNCE_INTERVAL = 30 * 1000;
     private static final int MAX_ANNOUNCE_DROP_COUNT = 3;
-    private static final long RETRANSMIT_INTERVAL = 5 * 1000;
+    private static final long RETRANSMIT_INTERVAL = 1 * 1000;
     private static final int MAX_RETRANSMIT_COUNT = 5;
     private static final String GROUP = "224.224.224.224";
 

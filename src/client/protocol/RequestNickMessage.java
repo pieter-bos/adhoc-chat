@@ -1,7 +1,9 @@
 package client.protocol;
 
-/**
- * Created by sophie on 4/15/14.
- */
-public class RequestNickMessage {
+public class RequestNickMessage extends Message {
+    public static final String TYPE = "requestNickMessage";
+
+    public RequestNickMessage() {
+        super(TYPE);
+    }
 }

@@ -26,7 +26,8 @@ var chat = angular.module('chat', [])
         .def('getUsers')
         .def('updateNickname')
         .def('sendMessage')
-        .def('subscribe');
+        .def('subscribe')
+        .def('addConversation');
 
 
     this.updateNickname = function(nickname) {
@@ -45,11 +46,11 @@ var chat = angular.module('chat', [])
     }
 
     this.addConversation = function(conversation) {
-        console.log(conversation);
+        this.socket.addConversation(conversation.user, function() {});
     }
 
-    this.socket.on('newConversation', function(data) {
-        console.log('new:');
+    this.socket.on('newConversation', function(user, messages, id) {
+        $rootScope.$broadcast('websocketService::newConversation', { user: user, messages: messages, id: id });
     });
 
     this.socket.on('newUser', function(user) {
@@ -65,7 +66,7 @@ var chat = angular.module('chat', [])
     });
 
     this.socket.on('error', function(error) {
-        console.log(error);
+        // TODO implement
     });
 
     this.socket.on('open', (function() {
@@ -156,15 +157,12 @@ var chat = angular.module('chat', [])
         }
 
         websocketService.addConversation(newConv);
-        this.addConversation(newConv);
-        $rootScope.$broadcast('conversationModel::conversationsChanged');
     }
 
     $rootScope.$on('websocketService::newMessage', function(event, id, message, nickname) {
         for (var i = 0; i < self.conversations.length; i++) {
             if (self.conversations[i].id === id) {
-                self.conversations[i].messages.push({name: nickname, value: message});
-                console.log(self.conversations[i].messages);
+                self.conversations[i].messages.push({nickname: nickname, message: message});
                 $(".tab-pane").animate({scrollTop: $(".tab-pane").height()+999999}, "slow");
             }
         }
