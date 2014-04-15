@@ -4,6 +4,7 @@ package client.protocol;
  * Invites other player to the conversation
  */
 public class InviteMessage extends Message {
+    private final String inviteMessage = "inviteMessage";
     private int conversation;
     private String[] members;
 

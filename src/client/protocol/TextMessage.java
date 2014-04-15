@@ -4,6 +4,7 @@ package client.protocol;
  * Sends a text message to the other conversation members
  */
 public class TextMessage extends Message {
+    private final String type = "textMessage";
     private int convId;
     private String nickname;
     private String message;
