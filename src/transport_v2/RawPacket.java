@@ -6,22 +6,49 @@ import java.net.InetAddress;
 import java.net.UnknownHostException;
 import java.nio.ByteBuffer;
 
+/****
+ *
+ *   0                   1                   2                   3
+ *   0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1
+ *  +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+ *  |                       Number used once                        |
+ *  +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+ *  |     Flags     |   Reserved 1  |   Reserved 2  |   Reserved 3  |
+ *  +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+ *  |                        Sequence Number                        |
+ *  +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+ *  |                    Acknowledgment Number                      |
+ *  +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+ *  |                       Source Address                          |
+ *  +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+ *  |                    Destination Address                        |
+ *  +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+ *  |                             data                              |
+ *  +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+ *
+ *  Note that each tick mark represents one bit position.
+ */
+
 public class RawPacket implements Comparable<RawPacket> {
-    public static final int MIN_SIZE = 21;
+    public static final int MIN_SIZE = 24;
 
     public static final byte ACK_MASK =      0b00000001;
     public static final byte SYN_MASK =      0b00000010;
     public static final byte ANNOUNCE_MASK = 0b00000100;
-    private static final byte[] BROADCAST_ADDRESS = new byte[] { 0, 0, 0, 0 };
-// private static final byte ZERO_MASK = 0b10000000; this bit must always be zero because evil stupid java only has signed byte.
+    // private static final byte ZERO_MASK = 0b10000000; this bit must always be zero because evil stupid java only has signed byte.
 
-    private int nonce;
-    private byte flags;
-    private int sequenceNumber;
+    private static final byte[] BROADCAST_ADDRESS = new byte[] { 0, 0, 0, 0 };
+
+    private final int nonce;
+    private final byte flags;
+    private final byte reserved1 = 0;
+    private final byte reserved2 = 0;
+    private final byte reserved3 = 0;
+    private final int sequenceNumber;
     private int acknowledgmentNumber;
     private byte[] sourceAddress = new byte[4];
     private byte[] destinationAddress = new byte[4];
-    private byte[] data;
+    private final byte[] data;
 
     public RawPacket(byte[] packet) throws InvalidPacketException {
         if (packet.length < MIN_SIZE) {
@@ -33,6 +60,9 @@ public class RawPacket implements Comparable<RawPacket> {
             if (flags < 0) {
                 throw new InvalidPacketException(":(");
             }
+            bb.get(); // Reserved 1
+            bb.get(); // Reserved 2
+            bb.get(); // Reserved 3
             sequenceNumber = bb.getInt();
             acknowledgmentNumber = bb.getInt();
 
@@ -105,6 +135,22 @@ public class RawPacket implements Comparable<RawPacket> {
         return nonce;
     }
 
+    public byte getFlags() {
+        return flags;
+    }
+
+    public byte getReserved1() {
+        return reserved1;
+    }
+
+    public byte getReserved2() {
+        return reserved2;
+    }
+
+    public byte getReserved3() {
+        return reserved3;
+    }
+
     public int getSequenceNumber() {
         return sequenceNumber;
     }
@@ -141,15 +187,14 @@ public class RawPacket implements Comparable<RawPacket> {
         return data;
     }
 
-    public byte getFlags() {
-        return flags;
-    }
-
     public byte[] getBytes() {
         ByteBuffer buffer = ByteBuffer.allocate(getLength());
 
         buffer.putInt(nonce);
         buffer.put(flags);
+        buffer.put((byte) 0); // Reserved 1
+        buffer.put((byte) 0); // Reserved 2
+        buffer.put((byte) 0); // Reserved 3
         buffer.putInt(sequenceNumber);
         buffer.putInt(acknowledgmentNumber);
         buffer.put(sourceAddress);
