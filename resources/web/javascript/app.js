@@ -56,13 +56,18 @@ var chat = angular.module('chat', [])
         $rootScope.$broadcast('websocketService::newUser', user);
     });
 
+    this.socket.on('removeUser', function(user) {
+        $rootScope.$broadcast('websocketService::removeUser', user);
+    });
+
     this.socket.on('error', function(error) {
         console.log(error);
     });
 
     this.socket.on('open', (function() {
-        this.socket.subscribe('newConversation', function(){});
-        this.socket.subscribe('newUser', function(){});
+        this.socket.subscribe('newConversation', function() {});
+        this.socket.subscribe('newUser', function() {});
+        this.socket.subscribe('removeUser', function() {});
 
         $rootScope.$broadcast('websocketService::connected');
 
@@ -106,6 +111,11 @@ var chat = angular.module('chat', [])
 
     $rootScope.$on('websocketService::newUser', function(event, user) {
         self.users.push(user);
+        $rootScope.$broadcast('userModel::usersChanged');
+    });
+
+    $rootScope.$on('websocketService::removeUser', function(event, user) {
+        self.users.splice(self.users.indexOf(user), 1);
         $rootScope.$broadcast('userModel::usersChanged');
     });
 })

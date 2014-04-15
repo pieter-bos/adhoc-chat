@@ -91,6 +91,8 @@ public class ApplicationState {
     }
 
     public void userLeft(LeaveMessage message) {
+        client.removeUser(message);
+
         for (Conversation conv : conversationList.values()) {
             if (conv.getUser().equals(message.getUsername())) {
                 conversationList.remove(conv.getId());

@@ -1,5 +1,6 @@
 package client;
 
+import client.protocol.LeaveMessage;
 import client.protocol.NickChangeMessage;
 import client.protocol.TextMessage;
 import client.wsjsonrpc.Expose;
@@ -71,5 +72,9 @@ public class ClientHandler implements WebSocketJsonRpcHandler {
 
     public void newUser(NickChangeMessage message) {
         rpc.notify("newUser", message.getUsername());
+    }
+
+    public void removeUser(LeaveMessage message) {
+        rpc.notify("removeUser", message.getUsername());
     }
 }
