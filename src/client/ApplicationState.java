@@ -57,7 +57,9 @@ public class ApplicationState {
     public void sendMessage(TextMessage message) {
         Conversation conv = this.conversationList.get(message.getConvId());
         InetAddress dest = this.users.get(conv.getUser());
-        network.send(new Gson().toJson(message).getBytes(), dest);
+        if (dest == null) {
+            network.broadcast(new Gson().toJson(message).getBytes());
+        }
     }
 
     public void addUser(NickChangeMessage message, InetAddress source) {
