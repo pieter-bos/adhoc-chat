@@ -41,7 +41,7 @@ public class ApplicationState {
     public ApplicationState() {
         users = new ClientAddressMapper();
         conversationList = new HashMap<>();
-        int id = new Random().nextInt(10000);
+        int id = -1;
         conversationList.put(id, new Conversation("", id));
     }
 

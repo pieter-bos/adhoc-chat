@@ -34,3 +34,9 @@ a {
 .tab-pane .form-inline {
     margin-bottom: 15px;
 }
+
+body {
+    background-image: url("../chat-emoticons/chat-background.gif");
+    background-repeat: no-repeat;
+    background-position: bottom right;
+}

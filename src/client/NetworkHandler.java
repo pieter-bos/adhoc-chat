@@ -1,12 +1,8 @@
 package client;
 
 import client.protocol.*;
-import client.protocol.Message;
 import com.google.gson.Gson;
-import transport_v2.Packet;
-import transport_v2.Socket;
-import transport_v2.SocketImpl;
-
+import transport_v2.*;
 import java.io.IOException;
 import java.net.InetAddress;
 
@@ -43,10 +39,10 @@ public class NetworkHandler extends Thread {
                 e.printStackTrace();
             }
 
-            String packetData = new String(packet.getData());
-            Message message = new Gson().fromJson(packetData, Message.class);
+            Message message = new Gson().fromJson(new String(packet.getData()), Message.class);
 
-            switch(message.getType()) {
+            String packetData = new String(packet.getData());
+            switch (message.getType()) {
                 case NickChangeMessage.TYPE:
                     NickChangeMessage nickChangeMessage = new Gson().fromJson(packetData, NickChangeMessage.class);
                     state.addUser(nickChangeMessage, packet.getSourceAddress());
@@ -60,8 +56,7 @@ public class NetworkHandler extends Thread {
                     state.userLeft(leaveMessage);
                     break;
                 case InviteMessage.TYPE:
-                    InviteMessage inviteMessage = new Gson().fromJson(packetData, InviteMessage.class);
-                    // TODO implement
+                    // TODO implement;
                     break;
             }
         }
