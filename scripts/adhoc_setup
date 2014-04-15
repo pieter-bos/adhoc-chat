@@ -1,5 +1,5 @@
 #!/bin/bash
-essid=unit
+essid=groep
 mac=f8:d1:11:64:5e:
 len=$(expr length $2)
 if [ $len -eq 2 ]
