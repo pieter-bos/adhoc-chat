@@ -176,7 +176,7 @@ var chat = angular.module('chat', [])
         var conv = new Conversation(user, removable);
         conv.id = data.id;
         conv.messages = data.messages;
-        self.conversations.push(conv);
+        self.addConversation(conv);
 
         $rootScope.$broadcast('conversationModel::conversationsChanged');
     });
@@ -224,6 +224,7 @@ var chat = angular.module('chat', [])
     $scope.sendMessage = function() {
         if (this.conversation.message != '') {
             websocketService.sendMessage(this.conversation.message, this.conversation.id);
+            console.log("Sending to " + this.conversation.id, this.conversation.message);
             this.conversation.message = '';
         }
     }

@@ -57,11 +57,12 @@ public class NetworkHandler extends Thread {
                     state.userLeft(leaveMessage);
                     break;
                 case InviteMessage.TYPE:
-                    // TODO implement;
+                    InviteMessage inviteMessage = new Gson().fromJson(packetData, InviteMessage.class);
+                    state.invite(inviteMessage);
                     break;
                 case RequestNickMessage.TYPE:
                     RequestNickMessage requestNickMessage = new Gson().fromJson(packetData, RequestNickMessage.class);
-                    send(new Gson().toJson(new NickChangeMessage(state.getNickname())).getBytes(), packet.getSourceAddress());
+                    state.requestNick(requestNickMessage, packet.getSourceAddress());
                     break;
             }
         }

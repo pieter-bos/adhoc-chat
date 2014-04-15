@@ -1,5 +1,6 @@
 package client;
 
+import client.protocol.InviteMessage;
 import client.protocol.LeaveMessage;
 import client.protocol.NickChangeMessage;
 import client.protocol.TextMessage;
@@ -86,5 +87,9 @@ public class ClientHandler implements WebSocketJsonRpcHandler {
 
     public void newMessage(Conversation conv, String user, String message) {
         rpc.notify("newMessage", conv.getId(), user, message);
+    }
+
+    public void invite(InviteMessage inviteMessage) {
+        rpc.notify("newConversation", inviteMessage.getOther(), new String[0], inviteMessage.getConversation());
     }
 }

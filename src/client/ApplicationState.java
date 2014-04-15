@@ -58,6 +58,8 @@ public class ApplicationState {
         InetAddress dest = this.users.get(conv.getUser());
         if (dest == null) {
             network.broadcast(new Gson().toJson(message).getBytes());
+        } else {
+            network.send(new Gson().toJson(message).getBytes(), dest);
         }
     }
 
@@ -108,7 +110,16 @@ public class ApplicationState {
     public int addConversation(String user) {
         int id = random.nextInt(MAX_CONVERSATION_ID);
         conversationList.put(id, new Conversation(user, id));
-        network.send(new Gson().toJson(new InviteMessage(id, new String[] { getNickname(), user })).getBytes(), users.get(user));
+        network.send(new Gson().toJson(new InviteMessage(id, getNickname())).getBytes(), users.get(user));
         return id;
+    }
+
+    public void invite(InviteMessage inviteMessage) {
+        conversationList.put(inviteMessage.getConversation(), new Conversation(inviteMessage.getOther(), inviteMessage.getConversation()));
+        client.invite(inviteMessage);
+    }
+
+    public void requestNick(RequestNickMessage requestNickMessage, InetAddress sourceAddress) {
+        network.send(new Gson().toJson(new NickChangeMessage(getNickname())).getBytes(), sourceAddress);
     }
 }
