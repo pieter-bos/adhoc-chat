@@ -14,6 +14,8 @@ public class SocketImpl implements Socket {
 
     private final InetAddress ip;
     private final MulticastSocket transport;
+    private final int port;
+    private final InetAddress group;
     private boolean connected = false;
     private final LinkedBlockingQueue<Packet> receiveQueue = new LinkedBlockingQueue<>();
     private final ReceiverThread receiverThread;
@@ -25,6 +27,9 @@ public class SocketImpl implements Socket {
     private final HashSet<InetAddress> network = new HashSet<>();
 
     public SocketImpl(int port) throws IOException {
+        this.port = port;
+        this.group = InetAddress.getByName(GROUP);
+
         InetAddress ip = null;
         NetworkInterface netIF = null;
 
@@ -46,7 +51,7 @@ public class SocketImpl implements Socket {
         this.ip = ip;
 
         transport = new MulticastSocket(port);
-        transport.joinGroup(new InetSocketAddress(GROUP, port), netIF);
+        transport.joinGroup(new InetSocketAddress(group, port), netIF);
 
         receiverThread = new ReceiverThread(transport, this);
 
@@ -94,7 +99,9 @@ public class SocketImpl implements Socket {
     }
 
     protected void send(RawPacket packet) throws IOException {
-        transport.send(new DatagramPacket(packet.getBytes(), packet.getLength()));
+        System.out.println("send " + packet);
+        DatagramPacket datagram = new DatagramPacket(packet.getBytes(), packet.getLength(), group, port);
+        transport.send(datagram);
     }
 
     protected void sendAndAwaitAck(RawPacket packet) throws IOException {
