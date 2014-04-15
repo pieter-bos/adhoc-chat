@@ -15,13 +15,13 @@ public class SynchronizationHandler implements PacketListener {
             return;
         }
 
-        socket.addToNetwork(packet.getSourceIp(), packet.getSequenceNumber());
-
         try {
             if(!packet.isAck()) {
                 socket.sendAndAwaitAck(RawPacket.newSynAck(socket.newSequenceNumber(packet.getSourceIp()), packet.getSequenceNumber(), socket.getIp(), packet.getSourceIp()));
+                // TODO add packet.getSourceIp() after acknowledged of SYN is received
             } else {
                 socket.send(RawPacket.newAcknowledgement(packet.getSequenceNumber(), socket.getIp(), packet.getSourceIp()));
+                socket.addToNetwork(packet.getSourceIp());
             }
         } catch (IOException e) {
             e.printStackTrace();

@@ -134,7 +134,12 @@ public class SocketImpl implements Socket {
 
     @Override
     public void send(byte[] data, InetAddress destination) {
-
+        synchronized (network) {
+            if (!network.contains(destination)) {
+                return; // TODO throw exception
+            }
+        }
+        // TODO send packet
     }
 
     @Override
@@ -171,7 +176,9 @@ public class SocketImpl implements Socket {
         return ip;
     }
 
-    public void addToNetwork(InetAddress ip, int sequenceNumber) {
-        network.add(ip);
+    public void addToNetwork(InetAddress ip) {
+        synchronized (network) {
+            network.add(ip);
+        }
     }
 }
