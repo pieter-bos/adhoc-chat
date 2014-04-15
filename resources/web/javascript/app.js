@@ -39,10 +39,8 @@ var chat = angular.module('chat', [])
     }
 
     this.sendMessage = function(message, convId) {
-        console.log(convId);
         this.socket.sendMessage(message, convId, function(e) {
             var m = JSON.parse(e);
-            console.log(m);
             $rootScope.$broadcast('websocketService::newMessage', m.convId, m.message, m.nickname);
         });
     }
@@ -58,7 +56,6 @@ var chat = angular.module('chat', [])
 
         self.socket.getUsers(function(e) {
             JSON.parse(e).forEach(function(element) {
-                console.log(element);
                 $rootScope.$broadcast('websocketService::newUser', element);
             });
         });
@@ -132,12 +129,9 @@ var chat = angular.module('chat', [])
     }
 
     $rootScope.$on('websocketService::newMessage', function(event, id, message, nickname) {
-        console.log(self);
-
         for (var i = 0; i < self.conversations.length; i++) {
             if (self.conversations[i].id === id) {
                 self.conversations[i].messages.push({name: nickname, value: message});
-                console.log(self.conversations[i]);
             }
         }
 
