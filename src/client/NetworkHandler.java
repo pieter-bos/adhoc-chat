@@ -1,8 +1,12 @@
 package client;
 
 import client.protocol.*;
+import client.protocol.Message;
 import com.google.gson.Gson;
-import transport_v2.*;
+import transport_v2.Packet;
+import transport_v2.Socket;
+import transport_v2.SocketImpl;
+
 import java.io.IOException;
 import java.net.InetAddress;
 
@@ -38,13 +42,27 @@ public class NetworkHandler extends Thread {
             } catch (InterruptedException e) {
                 e.printStackTrace();
             }
-            client.protocol.Message message = new Gson().fromJson(new String(packet.getData()), client.protocol.NickChangeMessage.class);
-            if (message instanceof NickChangeMessage) {
-                state.addUser((NickChangeMessage) message, packet.getSourceAddress());
-            } else if (message instanceof TextMessage) {
-                state.receiveMessage((TextMessage) message, packet.getSourceAddress());
-            } else if (message instanceof LeaveMessage) {
-                state.userLeft((LeaveMessage) message);
+
+            String packetData = new String(packet.getData());
+            Message message = new Gson().fromJson(packetData, Message.class);
+
+            switch(message.getType()) {
+                case NickChangeMessage.TYPE:
+                    NickChangeMessage nickChangeMessage = new Gson().fromJson(packetData, NickChangeMessage.class);
+                    state.addUser(nickChangeMessage, packet.getSourceAddress());
+                    break;
+                case TextMessage.TYPE:
+                    TextMessage textMessage = new Gson().fromJson(packetData, TextMessage.class);
+                    state.receiveMessage(textMessage, packet.getSourceAddress());
+                    break;
+                case LeaveMessage.TYPE:
+                    LeaveMessage leaveMessage = new Gson().fromJson(packetData, LeaveMessage.class);
+                    state.userLeft(leaveMessage);
+                    break;
+                case InviteMessage.TYPE:
+                    InviteMessage inviteMessage = new Gson().fromJson(packetData, InviteMessage.class);
+                    // TODO implement
+                    break;
             }
         }
     }

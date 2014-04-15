@@ -28,7 +28,6 @@ var chat = angular.module('chat', [])
         .def('sendMessage')
         .def('subscribe');
 
-    this.socket.subscribe('newConversation');
 
     this.updateNickname = function(nickname) {
         this.socket.updateNickname(nickname, function(e) {
@@ -53,11 +52,18 @@ var chat = angular.module('chat', [])
         console.log('new:');
     });
 
+    this.socket.on('newUser', function(user) {
+        $rootScope.$broadcast('websocketService::newUser', user);
+    });
+
     this.socket.on('error', function(error) {
         console.log(error);
-    })
+    });
 
-    this.socket.on('open', function() {
+    this.socket.on('open', (function() {
+        this.socket.subscribe('newConversation', function(){});
+        this.socket.subscribe('newUser', function(){});
+
         $rootScope.$broadcast('websocketService::connected');
 
         self.socket.getConversations(function(e) {
@@ -72,7 +78,7 @@ var chat = angular.module('chat', [])
                 $rootScope.$broadcast('websocketService::newUser', element);
             });
         });
-    });
+    }).bind(this));
 })
 // Provides application settings
 .service('settingService', function($rootScope, websocketService) {
