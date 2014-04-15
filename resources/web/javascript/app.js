@@ -76,9 +76,6 @@ var chat = angular.module('chat', [])
 
     this.init = function() {
         $('#nick-modal').modal({ keyboard: false, backdrop: 'static' });
-        $('#nick-modal form').on('submit', function(event) {
-            $('#nick-modal').modal('hide');
-        });
     }
 
     this.init();
@@ -161,6 +158,7 @@ var chat = angular.module('chat', [])
     }
 
     $scope.$on('settingService::nicknameChanged', function() {
+        $('#nick-modal').modal('hide');
         $scope.nickname = nickname;
         $scope.$apply();
     });
