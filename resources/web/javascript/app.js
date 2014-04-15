@@ -164,6 +164,7 @@ var chat = angular.module('chat', [])
         for (var i = 0; i < self.conversations.length; i++) {
             if (self.conversations[i].id === id) {
                 self.conversations[i].messages.push({name: nickname, value: message});
+                console.log(self.conversations[i].messages);
                 $(".tab-pane").animate({scrollTop: $(".tab-pane").height()+999999}, "slow");
             }
         }
