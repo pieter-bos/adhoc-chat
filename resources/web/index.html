@@ -23,6 +23,9 @@
                     <h4 class="modal-title" id="myModalLabel">Choose your nickname...</h4>
                 </div>
                 <div ng-controller="settingController" class="modal-body">
+                    <div ng-hide="connected" class="alert alert-danger">
+                        <span class="glyphicon glyphicon-warning-sign"></span> No connection...
+                    </div>
                     <form ng-submit="updateNickname()" class="form-horizontal" role="form">
                         <input ng-model="nicknameField" type="text" class="form-control" placeholder="Press enter when you're done..."/>
                     </form>
