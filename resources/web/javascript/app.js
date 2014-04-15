@@ -49,11 +49,18 @@ var chat = angular.module('chat', [])
         console.log('new:');
     });
 
+    this.socket.on('error', function(error) {
+        console.log(error);
+    })
+
     this.socket.on('open', function() {
         $rootScope.$broadcast('websocketService::connected');
 
         self.socket.getConversations(function(e) {
-            $rootScope.$broadcast('websocketService::newConversation', e);
+            var arr = JSON.parse(e);
+            arr.forEach(function(element) {
+                $rootScope.$broadcast('websocketService::newConversation', element);
+            });
         });
 
         self.socket.getUsers(function(e) {
@@ -138,8 +145,8 @@ var chat = angular.module('chat', [])
     });
 
     $rootScope.$on('websocketService::newConversation', function(event, data) {
-        var removable = data.user === undefined ? false : true;
-        var user = data.user === undefined ? 'Everyone' : data.user;
+        var removable = data.user === '' ? false : true;
+        var user = data.user === '' ? 'Everyone' : data.user;
         var conv = new Conversation(user, removable);
         conv.id = data.id;
         conv.messages = data.messages;
@@ -169,7 +176,6 @@ var chat = angular.module('chat', [])
     $scope.$on('websocketService::connected', function() {
         $scope.connected = true;
         $scope.$apply();
-        console.log($scope.connected);
     });
 })
 // Controller for user related views
