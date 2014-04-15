@@ -2,10 +2,7 @@ package client;
 
 import client.protocol.*;
 import com.google.gson.Gson;
-import transport.Packet;
-import transport.Socket;
-import transport.SocketImpl;
-
+import transport_v2.*;
 import java.io.IOException;
 import java.net.InetAddress;
 
@@ -35,7 +32,12 @@ public class NetworkHandler extends Thread {
     @Override
     public void run() {
         while (listening) {
-            Packet packet = socket.receive();
+            Packet packet = null;
+            try {
+                packet = socket.receive();
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
             client.protocol.Message message = new Gson().fromJson(new String(packet.getData()), client.protocol.Message.class);
             if (message instanceof NickChangeMessage) {
                 state.addUser((NickChangeMessage) message, packet.getSourceAddress());
@@ -53,7 +55,11 @@ public class NetworkHandler extends Thread {
      * @param dest Destination address
      */
     public void send(byte[] data, InetAddress dest) {
-        socket.send(data, dest);
+        try {
+            socket.send(data, dest);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
     }
 
     /**
@@ -61,6 +67,10 @@ public class NetworkHandler extends Thread {
      * @param data Data array
      */
     public void broadcast(byte[] data) {
-        socket.broadcast(data);
+        try {
+            socket.broadcast(data);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
     }
 }
