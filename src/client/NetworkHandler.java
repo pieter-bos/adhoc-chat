@@ -41,6 +41,8 @@ public class NetworkHandler extends Thread {
                 state.addUser((NickChangeMessage) message, packet.getSourceAddress());
             } else if (message instanceof TextMessage) {
                 state.receiveMessage((TextMessage) message, packet.getSourceAddress());
+            } else if (message instanceof LeaveMessage) {
+                state.userLeft((LeaveMessage) message);
             }
         }
     }

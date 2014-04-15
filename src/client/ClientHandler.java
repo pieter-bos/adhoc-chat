@@ -30,7 +30,7 @@ public class ClientHandler implements WebSocketJsonRpcHandler {
 
     @Override
     public void onClose(WebSocket webSocket, int i, String s, boolean b) {
-    //TODO implement
+        state.clientLeft();
     }
 
     @Override

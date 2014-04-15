@@ -4,13 +4,17 @@ package client.protocol;
  * Tells others that this client is leaving the conversation
  */
 public class LeaveMessage extends Message {
-    private int conversation;
+    private String username;
 
     /**
      * Constructor
      * @param conversation ID of the conversation
      */
-    public LeaveMessage(int conversation) {
-        this.conversation = conversation;
+    public LeaveMessage(String username) {
+        this.username = username;
+    }
+
+    public String getUsername() {
+        return username;
     }
 }

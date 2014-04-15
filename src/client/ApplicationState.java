@@ -1,7 +1,7 @@
 package client;
 
-import client.protocol.NickChangeMessage;
-import client.protocol.TextMessage;
+import client.protocol.*;
+import client.protocol.Message;
 import com.google.gson.Gson;
 
 import java.net.InetAddress;
@@ -84,5 +84,18 @@ public class ApplicationState {
 
     public ClientAddressMapper getUsers() {
         return users;
+    }
+
+    public void clientLeft() {
+        System.out.println("Client left");
+        network.broadcast(new Gson().toJson(new LeaveMessage(nickname)).getBytes());
+    }
+
+    public void userLeft(LeaveMessage message) {
+        for (Conversation conv : conversationList.values()) {
+            if (conv.getUser().equals(message.getUsername())) {
+                conversationList.remove(conv.getId());
+            }
+        }
     }
 }
