@@ -19,6 +19,9 @@ public class Main extends Thread {
     @Override
     public void run() {
         try {
+            while(!socket.getOtherClients().iterator().hasNext()) {
+
+            }
             socket.broadcast("test".getBytes());
             socket.broadcast(new byte[] {1, 2, 3});
 

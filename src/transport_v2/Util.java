@@ -24,9 +24,9 @@ public class Util {
         long decrementSteps = xx - yy;
 
         if(incrementSteps > decrementSteps) {
-            return -1 * decrementSteps;
+            return decrementSteps;
         } else {
-            return incrementSteps;
+            return -incrementSteps;
         }
     }
 }

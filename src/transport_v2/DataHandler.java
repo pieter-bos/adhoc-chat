@@ -44,12 +44,12 @@ public class DataHandler implements PacketListener {
                 lastInOrderSequenceNumber.put(packet.getSourceIp(), packet.getSequenceNumber());
                 outOfOrderPackets.put(packet.getSourceIp(), new TreeSet<RawPacket>());
                 sentButNoAck.put(packet.getSourceIp(), new HashSet<Integer>());
-            } else {
+            } else if (Util.differenceWithWrapAround(packet.getSequenceNumber(), lastInOrderSequenceNumber.get(packet.getSourceIp())) > 0) {
                 outOfOrderPackets.get(packet.getSourceIp()).add(packet);
             }
         } else if (!packet.isAck() && !packet.isAnnounce()) {
             // i.e. it is a data packet
-            if(Util.differenceWithWrapAround(packet.getSequenceNumber(), lastInOrderSequenceNumber.get(packet.getSourceIp())) > 0) {
+            if (Util.differenceWithWrapAround(packet.getSequenceNumber(), lastInOrderSequenceNumber.get(packet.getSourceIp())) > 0) {
                 outOfOrderPackets.get(packet.getSourceIp()).add(packet);
             }
 
@@ -69,6 +69,8 @@ public class DataHandler implements PacketListener {
                 }
                 lastInOrderSequenceNumber.put(packet.getSourceIp(), cur.getSequenceNumber());
                 it.remove();
+            } else if (cur.getSequenceNumber() <= lastInOrderSequenceNumber.get(packet.getSourceIp())) {
+                System.out.println("Dit hoort niet");
             } else {
                 break;
             }

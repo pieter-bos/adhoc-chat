@@ -48,6 +48,8 @@ public class ReceiverThread extends Thread {
                     continue;
                 }
 
+                System.out.println("received " + rawPacket);
+
                 Iterable<PacketListener> listenersCopy;
 
                 synchronized (listeners) {
