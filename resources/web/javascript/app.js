@@ -31,7 +31,11 @@ var chat = angular.module('chat', [])
     this.socket.subscribe('newConversation');
 
     this.updateNickname = function(nickname) {
-        this.socket.updateNickname(nickname, function(e) { console.log(e); });
+        this.socket.updateNickname(nickname, function(e) {
+            if (e != '') {
+                $rootScope.$broadcast('websocketService::nickChanged', e);
+            }
+        });
     }
 
     this.sendMessage = function(message, convId) {
@@ -66,9 +70,12 @@ var chat = angular.module('chat', [])
 
     this.updateNickname = function(nickname) {
         websocketService.updateNickname(nickname);
-        this.nickname = nickname;
-        $rootScope.$broadcast('settingService::nicknameChanged');
     }
+
+    $rootScope.$on('websocketService::nickChanged', function(event, nick) {
+        this.nickname = nick;
+        $rootScope.$broadcast('settingService::nicknameChanged');
+    });
 
     this.init = function() {
         $('#nick-modal').modal({ keyboard: false, backdrop: 'static' });
@@ -160,7 +167,8 @@ var chat = angular.module('chat', [])
     }
 
     $scope.$on('settingService::nicknameChanged', function() {
-        $scope.nickname = settingService.nickname;
+        $scope.nickname = nickname;
+        $scope.$apply();
     });
 })
 // Controller for user related views

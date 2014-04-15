@@ -23,9 +23,14 @@ public class ApplicationState {
         return nickname;
     }
 
-    public void setNickname(String nickname) {
-        this.nickname = nickname;
-        network.broadcast(new Gson().toJson(new NickChangeMessage(nickname)).getBytes());
+    public boolean setNickname(String nickname) {
+        if (!users.contains(nickname)) {
+            this.nickname = nickname;
+            network.broadcast(new Gson().toJson(new NickChangeMessage(nickname)).getBytes());
+            return true;
+        }
+
+        return false;
     }
 
     /**

@@ -67,6 +67,15 @@ public class ClientAddressMapper {
         usernameAddressMap.remove(username);
     }
 
+    /**
+     * Checks if a username is in use
+     * @param user
+     * @return
+     */
+    public boolean contains(String user) {
+        return usernameAddressMap.containsKey(user);
+    }
+
     public Collection<String> values() {
         return addressUsernameMap.values();
     }

@@ -39,10 +39,12 @@ public class ClientHandler implements WebSocketJsonRpcHandler {
     }
 
     @Expose
-    public boolean updateNickname(String nickname) {
-        state.setNickname(nickname);
-
-        return true;
+    public String updateNickname(String nickname) {
+        if (state.setNickname(nickname)) {
+            return nickname;
+        } else {
+            return "";
+        }
     }
 
     @Expose
