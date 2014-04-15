@@ -52,7 +52,7 @@ public class SocketImpl implements Socket {
         receiverThread.addPacketListener(new AnnounceHandler(this, timeLastAnnounceReceived));
         receiverThread.addPacketListener(new SynchronizationHandler(this));
         receiverThread.addPacketListener(new BroadcastHandler(this));
-        receiverThread.addPacketListener(new DataHandler(this, receiveQueue));
+        receiverThread.addPacketListener(new DataHandler(this, receiveQueue, sentButNoAck));
 
         receiverThread.start();
     }
