@@ -14,6 +14,7 @@ public class TextMessage extends Message {
      * @param message Contents of the message
      */
     public TextMessage(String message, String nickname, int convId) {
+        super("textMessage");
         this.message = message;
         this.nickname = nickname;
         this.convId = convId;

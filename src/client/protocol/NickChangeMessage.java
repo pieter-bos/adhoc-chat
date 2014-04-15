@@ -12,6 +12,7 @@ public class NickChangeMessage extends Message {
      * @param nick Nickname of this client
      */
     public NickChangeMessage(String nick) {
+        super("nickChangeMessage");
         this.username = nick;
     }
 

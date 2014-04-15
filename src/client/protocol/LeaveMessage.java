@@ -12,6 +12,7 @@ public class LeaveMessage extends Message {
      * @param conversation ID of the conversation
      */
     public LeaveMessage(String username) {
+        super("leaveMessage");
         this.username = username;
     }
 

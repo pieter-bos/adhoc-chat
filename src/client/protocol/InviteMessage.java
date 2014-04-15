@@ -4,7 +4,6 @@ package client.protocol;
  * Invites other player to the conversation
  */
 public class InviteMessage extends Message {
-    private final String inviteMessage = "inviteMessage";
     private int conversation;
     private String[] members;
 
@@ -14,6 +13,7 @@ public class InviteMessage extends Message {
      * @param members Other members of the conversation
      */
     public InviteMessage(int conversation, String[] members) {
+        super("inviteMessage");
         this.conversation = conversation;
         this.members = members;
     }
