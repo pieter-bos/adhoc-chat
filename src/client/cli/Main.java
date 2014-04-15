@@ -1,8 +1,8 @@
 package client.cli;
 
-import transport.Packet;
-import transport.Socket;
-import transport.SocketImpl;
+import transport_v2.Packet;
+import transport_v2.Socket;
+import transport_v2.SocketImpl;
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -18,14 +18,20 @@ public class Main extends Thread {
 
     @Override
     public void run() {
-        socket.broadcast("test".getBytes());
-        socket.broadcast(new byte[] {1, 2, 3});
+        try {
+            socket.broadcast("test".getBytes());
+            socket.broadcast(new byte[] {1, 2, 3});
 
-        while (true) {
-            System.out.println("waiting for packet");
-            Packet packet = socket.receive();
-            System.out.println("packet received");
-            System.out.println(packet.toString());
+            while (true) {
+                System.out.println("waiting for packet");
+                Packet packet = socket.receive();
+                System.out.println("packet received");
+                System.out.println(packet.toString());
+            }
+        } catch (IOException e) {
+            e.printStackTrace();
+        } catch (InterruptedException e) {
+            e.printStackTrace();
         }
     }
 
@@ -36,7 +42,7 @@ public class Main extends Thread {
         String line = readString("");
 
         while (!line.equals("exit") & socket.isConnected()) {
-            socket.broadcast(line.getBytes());
+            //socket.broadcast(line.getBytes());
 
             line = readString("");
         }
