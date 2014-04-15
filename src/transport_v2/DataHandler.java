@@ -1,5 +1,6 @@
 package transport_v2;
 
+import java.io.IOException;
 import java.net.InetAddress;
 import java.util.HashMap;
 import java.util.Iterator;
@@ -25,11 +26,18 @@ public class DataHandler implements PacketListener {
             return;
         }
 
-        if(packet.isSyn()) {
-            // TODO check if lastInOrderSequenceNumber and outOfOrderPackets contains key packet.getSourceIp()
+        if (!lastInOrderSequenceNumber.containsKey(packet.getSourceIp()) || !outOfOrderPackets.containsKey(packet.getSourceIp())) {
+            if (packet.isSyn()) {
+                lastInOrderSequenceNumber.put(packet.getSourceIp(), packet.getSequenceNumber());
+                outOfOrderPackets.put(packet.getSourceIp(), new TreeSet<RawPacket>());
+            } else {
+                return; // drop packets until SYN received
+            }
+        }
 
-            // If the sequence number of the SYN is smaller than the last in order sequence number or
-            //  there is a packet received out of order with a sequence number more than MAX_DIFFERENCE larger
+        if(packet.isSyn()) {
+            // If the sequence number of the SYN is lower than the last in order sequence number or
+            //  there is a packet received out of order with a sequence number more than MAX_DIFFERENCE higher
             //  then the other client is suspected of having restarted.
             if (Util.differenceWithWrapAround(packet.getSequenceNumber(), lastInOrderSequenceNumber.get(packet.getSourceIp())) < -1 ||
                     !outOfOrderPackets.get(packet.getSourceIp()).tailSet(packet).isEmpty() &&
@@ -43,13 +51,20 @@ public class DataHandler implements PacketListener {
         } else if (!packet.isAck() && !packet.isAnnounce()) { // TODO misschien betere/andere check
             // data packet
             outOfOrderPackets.get(packet.getSourceIp()).add(packet);
+            try {
+                socket.send(RawPacket.newAcknowledgement(packet.getSequenceNumber(), socket.getIp(), packet.getSourceIp()));
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
         }
 
         Iterator<RawPacket> it = outOfOrderPackets.get(packet.getSourceIp()).iterator();
         while (it.hasNext()) {
             RawPacket cur = it.next();
             if (cur.getSequenceNumber() == lastInOrderSequenceNumber.get(packet.getSourceIp()) +1) {
-                queue.add(new PacketImpl(cur));
+                if (!cur.isSyn()) {
+                    queue.add(new PacketImpl(cur));
+                }
                 lastInOrderSequenceNumber.put(packet.getSourceIp(), cur.getSequenceNumber());
                 it.remove();
             } else {
