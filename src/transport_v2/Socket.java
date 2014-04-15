@@ -8,8 +8,8 @@ public interface Socket {
 
     public void connect() throws IOException;
     public boolean isConnected();
-    public void send(byte[] data, InetAddress destination);
-    public void broadcast(byte[] data);
+    public void send(byte[] data, InetAddress destination) throws IOException;
+    public void broadcast(byte[] data) throws IOException;
     public Packet receive() throws InterruptedException;
     public Iterable<InetAddress> getOtherClients();
 }

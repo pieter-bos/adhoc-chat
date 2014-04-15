@@ -9,11 +9,11 @@ public class DataHandler implements PacketListener {
     private static final long MAX_DIFFERENCE = 5;
     private final SocketImpl socket;
     private final LinkedBlockingQueue<Packet> queue;
-    private HashMap<InetAddress, HashSet<RawPacket>> sentButNoAck;
+    private HashMap<InetAddress, HashSet<Integer>> sentButNoAck;
     private final HashMap<InetAddress, Integer> lastInOrderSequenceNumber = new HashMap<>();
     private final HashMap<InetAddress, SortedSet<RawPacket>> outOfOrderPackets = new HashMap<>();
 
-    public DataHandler(SocketImpl socket, LinkedBlockingQueue<Packet> queue, HashMap<InetAddress, HashSet<RawPacket>> sentButNoAck) {
+    public DataHandler(SocketImpl socket, LinkedBlockingQueue<Packet> queue, HashMap<InetAddress, HashSet<Integer>> sentButNoAck) {
         this.socket = socket;
         this.queue = queue;
         this.sentButNoAck = sentButNoAck;
@@ -43,7 +43,7 @@ public class DataHandler implements PacketListener {
                             Util.differenceWithWrapAround(packet.getSequenceNumber(), outOfOrderPackets.get(packet.getSourceIp()).last().getSequenceNumber()) < -MAX_DIFFERENCE) {
                 lastInOrderSequenceNumber.put(packet.getSourceIp(), packet.getSequenceNumber());
                 outOfOrderPackets.put(packet.getSourceIp(), new TreeSet<RawPacket>());
-                sentButNoAck.put(packet.getSourceIp(), new HashSet<RawPacket>());
+                sentButNoAck.put(packet.getSourceIp(), new HashSet<Integer>());
             } else {
                 outOfOrderPackets.get(packet.getSourceIp()).add(packet);
             }

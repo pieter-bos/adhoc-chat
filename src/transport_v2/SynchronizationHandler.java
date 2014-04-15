@@ -1,12 +1,17 @@
 package transport_v2;
 
 import java.io.IOException;
+import java.net.InetAddress;
+import java.util.HashMap;
+import java.util.HashSet;
 
 public class SynchronizationHandler implements PacketListener {
     private final SocketImpl socket;
+    private HashMap<InetAddress, HashSet<Integer>> sentSynAckButNoAck;
 
-    public SynchronizationHandler(SocketImpl socket) {
+    public SynchronizationHandler(SocketImpl socket, HashMap<InetAddress, HashSet<Integer>> sentSynAckButNoAck) {
         this.socket = socket;
+        this.sentSynAckButNoAck = sentSynAckButNoAck;
     }
 
     @Override
@@ -17,8 +22,16 @@ public class SynchronizationHandler implements PacketListener {
 
         try {
             if(!packet.isAck()) {
-                socket.sendAndAwaitAck(RawPacket.newSynAck(socket.newSequenceNumber(packet.getSourceIp()), packet.getSequenceNumber(), socket.getIp(), packet.getSourceIp()));
-                // TODO add packet.getSourceIp() after acknowledged of SYN is received
+                RawPacket synAck = RawPacket.newSynAck(socket.newSequenceNumber(packet.getSourceIp()), packet.getSequenceNumber(), socket.getIp(), packet.getSourceIp());
+                socket.sendAndAwaitAck(synAck);
+
+                synchronized(sentSynAckButNoAck) {
+                    if(!sentSynAckButNoAck.containsKey(packet.getSourceIp())) {
+                        sentSynAckButNoAck.put(packet.getSourceIp(), new HashSet<Integer>());
+                    }
+
+                    sentSynAckButNoAck.get(packet.getSourceIp()).add(synAck.getSequenceNumber());
+                }
             } else {
                 socket.send(RawPacket.newAcknowledgement(packet.getSequenceNumber(), socket.getIp(), packet.getSourceIp()));
                 socket.addToNetwork(packet.getSourceIp());

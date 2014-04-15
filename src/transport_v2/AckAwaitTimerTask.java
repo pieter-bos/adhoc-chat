@@ -1,16 +1,18 @@
 package transport_v2;
 
 import java.io.IOException;
+import java.net.InetAddress;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.TimerTask;
 
 public class AckAwaitTimerTask extends TimerTask {
-    private SocketImpl socket;
-    private RawPacket packet;
-    private HashSet<RawPacket> sentButNoAck;
-    private int retries;
+    private final SocketImpl socket;
+    private final RawPacket packet;
+    private final HashMap<InetAddress, HashSet<Integer>> sentButNoAck;
+    private final int retries;
 
-    public AckAwaitTimerTask(SocketImpl socket, RawPacket packet, HashSet<RawPacket> sentButNoAck, int retries) {
+    public AckAwaitTimerTask(SocketImpl socket, RawPacket packet, HashMap<InetAddress, HashSet<Integer>> sentButNoAck, int retries) {
         this.socket = socket;
         this.packet = packet;
         this.sentButNoAck = sentButNoAck;
@@ -22,7 +24,11 @@ public class AckAwaitTimerTask extends TimerTask {
         boolean acked;
 
         synchronized(sentButNoAck) {
-            acked = !sentButNoAck.contains(packet);
+            if(sentButNoAck.containsKey(packet.getDestinationIp())) {
+                acked = !sentButNoAck.get(packet.getDestinationIp()).contains(packet.getSequenceNumber());
+            } else {
+                acked = true;
+            }
         }
 
         if(!acked) {

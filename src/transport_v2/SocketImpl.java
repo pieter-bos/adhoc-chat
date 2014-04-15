@@ -10,7 +10,7 @@ public class SocketImpl implements Socket {
     private static final int MAX_ANNOUNCE_DROP_COUNT = 3;
     private static final long RETRANSMIT_INTERVAL = 1 * 1000;
     private static final int MAX_RETRANSMIT_COUNT = 5;
-    private static String GROUP = "244.244.244.244";
+    private static final String GROUP = "244.244.244.244";
 
     private final InetAddress ip;
     private final MulticastSocket transport;
@@ -20,7 +20,8 @@ public class SocketImpl implements Socket {
 
     private final HashMap<InetAddress, Long> timeLastAnnounceReceived = new HashMap<>();
     private final HashMap<InetAddress, Integer> lastUsedSequenceNumber = new HashMap<>();
-    private final HashMap<InetAddress, HashSet<RawPacket>> sentButNoAck = new HashMap<>();
+    private final HashMap<InetAddress, HashSet<Integer>> sentButNoAck = new HashMap<>();
+    private final HashMap<InetAddress, HashSet<Integer>> sentSynAckButNoAck = new HashMap<>();
     private final HashSet<InetAddress> network = new HashSet<>();
 
     public SocketImpl(int port) throws IOException {
@@ -50,9 +51,10 @@ public class SocketImpl implements Socket {
         receiverThread = new ReceiverThread(transport, this);
 
         receiverThread.addPacketListener(new AnnounceHandler(this, timeLastAnnounceReceived));
-        receiverThread.addPacketListener(new SynchronizationHandler(this));
+        receiverThread.addPacketListener(new SynchronizationHandler(this, sentSynAckButNoAck));
         receiverThread.addPacketListener(new BroadcastHandler(this));
         receiverThread.addPacketListener(new DataHandler(this, receiveQueue, sentButNoAck));
+        receiverThread.addPacketListener(new AcknowledgementHandler(this, sentButNoAck, sentSynAckButNoAck));
 
         receiverThread.start();
     }
@@ -81,7 +83,7 @@ public class SocketImpl implements Socket {
                     e.printStackTrace();
                 }
             }
-        }, 0, ANNOUNCE_INTERVAL);
+        }, ANNOUNCE_INTERVAL, ANNOUNCE_INTERVAL);
 
         this.connected = true;
     }
@@ -108,10 +110,12 @@ public class SocketImpl implements Socket {
         send(packet);
 
         if(!sentButNoAck.containsKey(packet.getDestinationIp())) {
-            sentButNoAck.put(packet.getDestinationIp(), new HashSet<RawPacket>());
+            sentButNoAck.put(packet.getDestinationIp(), new HashSet<Integer>());
         }
 
-        new Timer().schedule(new AckAwaitTimerTask(this, packet, sentButNoAck.get(packet.getDestinationIp()), retries), RETRANSMIT_INTERVAL);
+        sentButNoAck.get(packet.getDestinationIp()).add(packet.getSequenceNumber());
+
+        new Timer().schedule(new AckAwaitTimerTask(this, packet, sentButNoAck, retries), RETRANSMIT_INTERVAL);
     }
 
     protected void removeFromNetwork(InetAddress ip) {
@@ -133,18 +137,28 @@ public class SocketImpl implements Socket {
     }
 
     @Override
-    public void send(byte[] data, InetAddress destination) {
+    public void send(byte[] data, InetAddress destination) throws IOException {
         synchronized (network) {
             if (!network.contains(destination)) {
-                return; // TODO throw exception
+                throw new IOException("Destination not in current network");
             }
         }
-        // TODO send packet
+
+        sendAndAwaitAck(RawPacket.newData(newSequenceNumber(destination), getIp(), destination, data));
     }
 
     @Override
-    public void broadcast(byte[] data) {
+    @SuppressWarnings("unchecked")
+    public void broadcast(byte[] data) throws IOException {
+        Iterable<InetAddress> networkClone;
 
+        synchronized(network) {
+            networkClone = (Iterable<InetAddress>) network.clone();
+        }
+
+        for(InetAddress destination : networkClone) {
+            send(data, destination);
+        }
     }
 
     @Override
@@ -157,9 +171,11 @@ public class SocketImpl implements Socket {
     }
 
     @Override
+    @SuppressWarnings("unchecked")
     public Iterable<InetAddress> getOtherClients() {
-        // TODO implement
-        return null;
+        synchronized(network) {
+            return (Iterable<InetAddress>) network.clone();
+        }
     }
 
     protected int newSequenceNumber(InetAddress destination) {
