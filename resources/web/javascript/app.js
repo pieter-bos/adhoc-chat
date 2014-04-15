@@ -45,6 +45,10 @@ var chat = angular.module('chat', [])
         });
     }
 
+    this.addConversation = function(conversation) {
+        console.log(conversation);
+    }
+
     this.socket.on('newConversation', function(data) {
         console.log('new:');
     });
@@ -130,6 +134,7 @@ var chat = angular.module('chat', [])
             }
         }
 
+        websocketService.addConversation(newConv);
         this.addConversation(newConv);
         $rootScope.$broadcast('conversationModel::conversationsChanged');
     }
