@@ -60,6 +60,10 @@ var chat = angular.module('chat', [])
         $rootScope.$broadcast('websocketService::removeUser', user);
     });
 
+    this.socket.on('newMessage', function(conv, user, message) {
+        $rootScope.$broadcast('websocketService::newMessage', conv, message, user);
+    });
+
     this.socket.on('error', function(error) {
         console.log(error);
     });
@@ -68,6 +72,7 @@ var chat = angular.module('chat', [])
         this.socket.subscribe('newConversation', function() {});
         this.socket.subscribe('newUser', function() {});
         this.socket.subscribe('removeUser', function() {});
+        this.socket.subscribe('newMessage', function() {});
 
         $rootScope.$broadcast('websocketService::connected');
 
@@ -159,6 +164,7 @@ var chat = angular.module('chat', [])
         for (var i = 0; i < self.conversations.length; i++) {
             if (self.conversations[i].id === id) {
                 self.conversations[i].messages.push({name: nickname, value: message});
+                console.log(self.conversations[i].messages);
                 $(".tab-pane").animate({scrollTop: $(".tab-pane").height()+999999}, "slow");
             }
         }

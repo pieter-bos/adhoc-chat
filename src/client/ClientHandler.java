@@ -77,4 +77,8 @@ public class ClientHandler implements WebSocketJsonRpcHandler {
     public void removeUser(LeaveMessage message) {
         rpc.notify("removeUser", message.getUsername());
     }
+
+    public void newMessage(Conversation conv, String user, String message) {
+        rpc.notify("newMessage", conv.getId(), user, message);
+    }
 }
