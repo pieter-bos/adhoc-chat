@@ -1,8 +1,6 @@
 package client;
 
-import client.protocol.LeaveMessage;
-import client.protocol.NickChangeMessage;
-import client.protocol.TextMessage;
+import client.protocol.*;
 import client.wsjsonrpc.Expose;
 import client.wsjsonrpc.WebSocketJsonRpc;
 import client.wsjsonrpc.WebSocketJsonRpcHandler;
@@ -72,6 +70,12 @@ public class ClientHandler implements WebSocketJsonRpcHandler {
         rpc.notify("newConversation", user, new String[0], id);
     }
 
+    @Expose
+    public void leaveConversation(int convId) {
+        state.leaveConversation(convId);
+        rpc.notify("leaveConversation", convId);
+    }
+
     public void newConversation(Conversation newConv) {
         rpc.notify("newConversation", newConv);
     }
@@ -86,5 +90,13 @@ public class ClientHandler implements WebSocketJsonRpcHandler {
 
     public void newMessage(Conversation conv, String user, String message) {
         rpc.notify("newMessage", conv.getId(), user, message);
+    }
+
+    public void invite(InviteMessage inviteMessage) {
+        rpc.notify("newConversation", inviteMessage.getOther(), new String[0], inviteMessage.getConversation());
+    }
+
+    public void leaveConversation(LeaveConversationMessage leaveConversationMessage) {
+        rpc.notify("leaveConversation", leaveConversationMessage.getConvId());
     }
 }
