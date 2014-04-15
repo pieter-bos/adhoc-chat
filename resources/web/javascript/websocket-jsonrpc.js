@@ -43,6 +43,10 @@ function WebSocketJSONRPC(url) {
     }
 
     this.emit = function(event) {
+        if(event === 'error' && this.events.error.length === 0) {
+            console.log('Error occurred but no error handler defined:', arguments[1]);
+        }
+
         if(!event in this.events) {
             return;
         }
