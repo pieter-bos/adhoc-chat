@@ -80,8 +80,11 @@ var chat = angular.module('chat', [])
 
     this.socket.on('open', (function() {
         this.socket.subscribe('newConversation', function() {});
+        this.socket.subscribe('leaveConversation', function() {});
+
         this.socket.subscribe('newUser', function() {});
         this.socket.subscribe('removeUser', function() {});
+
         this.socket.subscribe('newMessage', function() {});
 
         $rootScope.$broadcast('websocketService::connected');
@@ -150,10 +153,13 @@ var chat = angular.module('chat', [])
 
     // Removes a conversation and makes the default conversation active
     this.removeConversation = function(conv) {
-        this.conversations.splice(this.conversations.indexOf(conv), 1);
+        var index = this.conversations.indexOf(conv);
+
+        if(index !== -1) {
+            this.conversations.splice(index, 1);
+        }
+
         this.conversations[0].active = 'active';
-        websocketService.leaveConversation(conv);
-        $rootScope.$broadcast('conversationModel::conversationsChanged');
     }
 
     // Starts a new conversation with the user if there is no current conversation with the user
@@ -245,6 +251,8 @@ var chat = angular.module('chat', [])
 
     $scope.closeConversation = function() {
         conversationModel.removeConversation(this.conversation);
+        websocketService.leaveConversation(this.conversation);
+        $scope.$emit('conversationModel::conversationsChanged');
     }
 
     $scope.$on('conversationModel::conversationsChanged', function() {

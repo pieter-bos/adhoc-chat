@@ -73,7 +73,6 @@ public class ClientHandler implements WebSocketJsonRpcHandler {
     @Expose
     public void leaveConversation(int convId) {
         state.leaveConversation(convId);
-        rpc.notify("leaveConversation", convId);
     }
 
     public void newConversation(Conversation newConv) {

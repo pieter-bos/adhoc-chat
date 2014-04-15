@@ -10,6 +10,7 @@ public class Main {
     private ApplicationState state;
     private ClientHandler client = null;
     private NetworkHandler network;
+    private SimpleServer server;
 
     /**
      * Constructor
@@ -21,6 +22,7 @@ public class Main {
         state.setHandlers(client, network);
         final WebSocketJsonRpc<ClientHandler> rpc = new WebSocketJsonRpc<ClientHandler>(new InetSocketAddress(8081), client, ClientHandler.class);
         client.setSocket(rpc);
+        server = new SimpleServer(8080);
 
         rpc.start();
         network.start();
