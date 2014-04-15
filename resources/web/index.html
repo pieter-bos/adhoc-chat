@@ -65,7 +65,7 @@
                 <div ng-repeat="conversation in conversations" id="{{conversation.id}}" class="tab-pane {{conversation.active}}">
                     <ul class="list-unstyled message-field">
                         <li ng-repeat="message in conversation.messages">
-                            <span>{{message.name}}: {{message.value}}</span>
+                            <span>{{message.nickname}}: {{message.message}}</span>
                         </li>
                     </ul>
 

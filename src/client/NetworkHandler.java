@@ -37,6 +37,7 @@ public class NetworkHandler extends Thread {
                 packet = socket.receive();
             } catch (InterruptedException e) {
                 e.printStackTrace();
+                continue;
             }
 
             Message message = new Gson().fromJson(new String(packet.getData()), Message.class);
@@ -57,6 +58,10 @@ public class NetworkHandler extends Thread {
                     break;
                 case InviteMessage.TYPE:
                     // TODO implement;
+                    break;
+                case RequestNickMessage.TYPE:
+                    RequestNickMessage requestNickMessage = new Gson().fromJson(packetData, RequestNickMessage.class);
+                    send(new Gson().toJson(new NickChangeMessage(state.getNickname())).getBytes(), packet.getSourceAddress());
                     break;
             }
         }

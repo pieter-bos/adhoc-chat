@@ -27,7 +27,7 @@ public class ClientHandler implements WebSocketJsonRpcHandler {
 
     @Override
     public void onOpen(WebSocket webSocket, ClientHandshake clientHandshake) {
-    //TODO implement
+
     }
 
     @Override
@@ -64,6 +64,12 @@ public class ClientHandler implements WebSocketJsonRpcHandler {
     @Expose
     public String getUsers() {
         return new Gson().toJson(state.getUsers().values());
+    }
+
+    @Expose
+    public void addConversation(String user) {
+        int id = state.addConversation(user);
+        rpc.notify("newConversation", user, new String[0], id);
     }
 
     public void newConversation(Conversation newConv) {
