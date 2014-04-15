@@ -38,7 +38,7 @@ public class NetworkHandler extends Thread {
             } catch (InterruptedException e) {
                 e.printStackTrace();
             }
-            client.protocol.Message message = new Gson().fromJson(new String(packet.getData()), client.protocol.Message.class);
+            client.protocol.Message message = new Gson().fromJson(new String(packet.getData()), client.protocol.NickChangeMessage.class);
             if (message instanceof NickChangeMessage) {
                 state.addUser((NickChangeMessage) message, packet.getSourceAddress());
             } else if (message instanceof TextMessage) {

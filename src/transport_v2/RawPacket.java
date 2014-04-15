@@ -207,6 +207,7 @@ public class RawPacket implements Comparable<RawPacket> {
 
         result += ", src=" + getSourceIp();
         result += ", dst=" + getDestinationIp();
+        result += ", data=" + new String(getData());
 
         return result;
     }

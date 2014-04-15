@@ -23,6 +23,7 @@ public class Main {
         client.setSocket(rpc);
 
         rpc.start();
+        network.start();
 
     }
 
