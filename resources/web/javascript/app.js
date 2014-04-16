@@ -153,13 +153,15 @@ var chat = angular.module('chat', [])
 
     // Removes a conversation and makes the default conversation active
     this.removeConversation = function(conv) {
-        var index = this.conversations.indexOf(conv);
-
-        if(index !== -1) {
-            this.conversations.splice(index, 1);
+        for (var id in this.conversations) {
+            if (this.conversations[id].id == conv) {
+                this.conversations.splice(id, 1);
+            }
         }
 
         this.conversations[0].active = 'active';
+
+        $rootScope.$broadcast('conversationModel::conversationsChanged');
     }
 
     // Starts a new conversation with the user if there is no current conversation with the user
