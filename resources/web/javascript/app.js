@@ -251,8 +251,6 @@ var chat = angular.module('chat', [])
             var indices = [ index for (index of set) ];
             indices.sort(function(a, b) { return (a > b) - (a < b); });
 
-            console.log(indices);
-
             var result = [];
 
             for(var i = 0; i < indices.length - 1; i++) {
@@ -276,8 +274,6 @@ var chat = angular.module('chat', [])
                 }
 
             }
-
-            console.log(result);
 
             return result;
         }).bind(this);
@@ -340,7 +336,6 @@ var chat = angular.module('chat', [])
     $scope.sendMessage = function() {
         if (this.conversation.message != '') {
             websocketService.sendMessage(this.conversation.message, this.conversation.id);
-            console.log("Sending to " + this.conversation.id, this.conversation.message);
             this.conversation.message = '';
         }
     }
@@ -357,7 +352,6 @@ var chat = angular.module('chat', [])
     });
 
     $scope.addEmoticon = function(e) {
-        console.log(this.emoticon.code);
         this.conversation.message += this.emoticon.code;
     }
 });
