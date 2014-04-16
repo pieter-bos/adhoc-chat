@@ -5,7 +5,7 @@ function Conversation(user, removable) {
     this.active = 'active';
     this.removable = removable == undefined ? true : removable;
 
-    this.message;
+    this.message = '';
     this.messages = [];
 
     this.title = function() {
@@ -142,6 +142,24 @@ var chat = angular.module('chat', [])
     var self = this;
     this.conversations = [];
 
+    this.EMOTICONS = [
+         { code: "(o^.^o)", link: "chat-emoticons/emoticon-1.gif" },
+         { code: "(=@=)", link: "chat-emoticons/emoticon-2.gif" },
+         { code: "(^o^)", link: "chat-emoticons/emoticon-3.gif" },
+         { code: "(\\-.-)", link: "chat-emoticons/emoticon-4.gif" },
+         { code: "(nod)", link: "chat-emoticons/emoticon-5.gif" },
+         { code: "(\\^.^/)", link: "chat-emoticons/emoticon-6.gif" },
+         { code: "(-.-)", link: "chat-emoticons/emoticon-7.gif" },
+         { code: "(^o^\\)", link: "chat-emoticons/emoticon-8.gif" },
+         { code: "(O.)", link: "chat-emoticons/emoticon-9.gif" },
+         { code: "(o^o)", link: "chat-emoticons/emoticon-10.gif" },
+         { code: "(\\,/)", link: "chat-emoticons/emoticon-11.gif" },
+         { code: "(=_=)", link: "chat-emoticons/emoticon-12.gif" },
+         { code: "(^.^)", link: "chat-emoticons/emoticon-13.gif" },
+         { code: "(T0T)", link: "chat-emoticons/emoticon-14.gif" },
+         { code: "(\\^o^)", link: "chat-emoticons/emoticon-15.gif"}
+     ];
+
     // Adds a new conversation to the list and makes all other conversations inactive
     this.addConversation = function(conv) {
         for (var i = 0; i < this.conversations.length; i++) {
@@ -180,7 +198,9 @@ var chat = angular.module('chat', [])
     $rootScope.$on('websocketService::newMessage', function(event, id, message, nickname) {
         for (var i = 0; i < self.conversations.length; i++) {
             if (self.conversations[i].id === id) {
-                self.conversations[i].messages.push({nickname: nickname, message: message});
+                self.conversations[i].messages.push(
+                    {name: nickname, value: self.parseMessage(message)}
+                );
                 $(".tab-pane").animate({scrollTop: $(".tab-pane").height()+999999}, "slow");
             }
         }
@@ -202,6 +222,74 @@ var chat = angular.module('chat', [])
     $rootScope.$on('websocketService::leaveConversation', function(event, convId) {
         self.removeConversation(convId);
     });
+
+    this.parseMessage = (function(message) {
+            var set = new Set();
+
+            for (var i in this.EMOTICONS) {
+                var emoticon = this.EMOTICONS[i];
+
+                var lastIndex = -1;
+
+                while(true) {
+                    var part = message.substring(lastIndex + 1);
+                    var subIndex = part.indexOf(emoticon.code);
+
+                    if(subIndex === -1) {
+                        break;
+                    }
+
+                    lastIndex = subIndex + lastIndex + 1;
+                    set.add(lastIndex);
+                    set.add(lastIndex + emoticon.code.length);
+                }
+            }
+
+            set.add(0);
+            set.add(message.length);
+
+            var indices = [ index for (index of set) ];
+            indices.sort(function(a, b) { return (a > b) - (a < b); });
+
+            console.log(indices);
+
+            var result = [];
+
+            for(var i = 0; i < indices.length - 1; i++) {
+                var left = indices[i];
+                var right = indices[i+1];
+
+                var str = message.substring(left, right);
+
+                var emoticon = this.getEmoticon(str);
+
+                if (emoticon) {
+                    result.push({
+                        type: "emoticon",
+                        src: emoticon.link
+                    });
+                } else {
+                    result.push({
+                        type: "text",
+                        value: str
+                    });
+                }
+
+            }
+
+            console.log(result);
+
+            return result;
+        }).bind(this);
+
+        this.getEmoticon = (function(string) {
+            for (var j=0 ; j<this.EMOTICONS.length; j++) {
+                if (this.EMOTICONS[j].code === string) {
+                    return this.EMOTICONS[j];
+                }
+            }
+            return null;
+        }).bind(this);
 })
 // Controller for application settings
 .controller('settingController', function($scope, settingService) {
@@ -241,7 +329,13 @@ var chat = angular.module('chat', [])
 })
 // Controller for conversation related views
 .controller('conversationController', function($scope, conversationModel, websocketService) {
+    $scope.EMOTICONS = conversationModel.EMOTICONS;
+
     $scope.conversations = conversationModel.conversations;
+
+    $scope.$on("addEmoticon", function(e, emoticon) {
+
+    });
 
     $scope.sendMessage = function() {
         if (this.conversation.message != '') {
@@ -261,4 +355,9 @@ var chat = angular.module('chat', [])
         $scope.conversations = conversationModel.conversations;
         $scope.$apply();
     });
+
+    $scope.addEmoticon = function(e) {
+        console.log(this.emoticon.code);
+        this.conversation.message += this.emoticon.code;
+    }
 });

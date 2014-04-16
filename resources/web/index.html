@@ -16,8 +16,10 @@
 </head>
 <body>
 <img id="#hamster" src="http://public.pieterbos.me/hamster.jpg">
+
 <div class="container">
-    <div class="modal fade" id="nick-modal" tabindex="-1" role="dialog" aria-hidden="true" aria-labelledby="nick-modal-label">
+    <div class="modal fade" id="nick-modal" tabindex="-1" role="dialog" aria-hidden="true"
+         aria-labelledby="nick-modal-label">
         <div class="modal-dialog">
             <div class="modal-content">
                 <div class="modal-header">
@@ -28,7 +30,8 @@
                         <span class="glyphicon glyphicon-warning-sign"></span> No connection...
                     </div>
                     <form ng-submit="updateNickname()" class="form-horizontal" role="form">
-                        <input ng-model="nicknameField" type="text" class="form-control" placeholder="Press enter when you're done..."/>
+                        <input ng-model="nicknameField" type="text" class="form-control"
+                               placeholder="Press enter when you're done..."/>
                     </form>
                 </div>
             </div>
@@ -41,6 +44,7 @@
         <div class="col-md-4">
             <div class="well" ng-controller="settingController">
                 <h3>{{ nickname }}</h3>
+
                 <p>
                     Welcome to Hamster Chat. Click on a person to below to start a conversation with them
                     or type something in the chat-window to the right to chat with everyone!
@@ -62,11 +66,19 @@
                 </li>
             </ul>
             <div class="tab-content">
-                <div ng-repeat="conversation in conversations" id="{{conversation.id}}" class="tab-pane {{conversation.active}}">
+                <div ng-repeat="conversation in conversations" id="{{conversation.id}}"
+                     class="tab-pane {{conversation.active}}">
                     <ul class="list-unstyled message-field">
                         <li ng-repeat="message in conversation.messages">
-                            <span>{{message.nickname}}: {{message.message}}</span>
+                            <span>{{message.name}}:</span>
+                            <span ng-repeat="part in message.value">
+                                <span ng-switch on="part.type">
+                                    <span ng-switch-when="text">{{part.value}}</span>
+                                    <img ng-switch-when="emoticon" src="{{part.src}}">
+                                </span>
+                            </span>
                         </li>
+                    </ul>
                     </ul>
 
                     <form ng-submit="sendMessage()" class="form-inline" role="form">
@@ -76,12 +88,13 @@
                         <button type="button" class="btn btn-info dropdown-toggle" data-toggle="dropdown">
                             Emoticons<span class="caret"></span></button>
                         <ul class="list-inline dropdown-menu" role="menu">
-                            <li ng-controller="emoticonController" ng-repeat="emoticon in EMOTICONS">
-                                <img ng-click="addEmoticon()" src={{emoticon.link}} />
+                            <li ng-repeat="emoticon in EMOTICONS">
+                                <img ng-click="addEmoticon()" src={{emoticon.link}}>
                             </li>
                         </ul>
 
-                        <input ng-if="conversation.removable" ng-click="closeConversation()" id="leave-conv" class="btn btn-danger" type="button" value="Leave Conversation" />
+                        <input ng-if="conversation.removable" ng-click="closeConversation()" id="leave-conv"
+                               class="btn btn-danger" type="button" value="Leave Conversation"/>
                     </form>
 
                 </div>
