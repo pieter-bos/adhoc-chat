@@ -195,9 +195,9 @@ public class SocketImpl extends Socket {
 
     @Override
     @SuppressWarnings("unchecked")
-    public Iterable<InetAddress> getOtherClients() {
+    public HashSet<InetAddress> getOtherClients() {
         synchronized(network) {
-            return (Iterable<InetAddress>) network.clone();
+            return (HashSet<InetAddress>) network.clone();
         }
     }
 

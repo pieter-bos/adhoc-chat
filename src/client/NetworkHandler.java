@@ -5,11 +5,13 @@ import com.google.gson.Gson;
 import transport_v2.*;
 import java.io.IOException;
 import java.net.InetAddress;
+import java.util.Observable;
+import java.util.Observer;
 
 /**
  * NetworkHandler handles all network traffic.
  */
-public class NetworkHandler extends Thread {
+public class NetworkHandler extends Thread implements Observer {
     private ApplicationState state;
     private Socket socket;
     private boolean listening = true;
@@ -27,6 +29,8 @@ public class NetworkHandler extends Thread {
         } catch (IOException e) {
             e.printStackTrace();
         }
+
+        socket.addObserver(this);
     }
 
     @Override
@@ -94,6 +98,28 @@ public class NetworkHandler extends Thread {
             socket.broadcast(data);
         } catch (IOException e) {
             e.printStackTrace();
+        }
+    }
+
+    @Override
+    public void update(Observable o, Object arg) {
+        for (InetAddress client : socket.getOtherClients()) {
+            if (!state.getUsers().contains(client)) {
+                broadcast(new Gson().toJson(new RequestNickMessage()).getBytes());
+                break;
+            }
+        }
+
+        for (String user : state.getUsers().values()) {
+            if (!socket.getOtherClients().contains(state.getUsers().get(user))) {
+                state.getUsers().remove(user);
+
+                for (Conversation conv : state.getConversationList().values()) {
+                    if (conv.getUser().equals(user)) {
+                        state.getConversationList().remove(conv);
+                    }
+                }
+            }
         }
     }
 }

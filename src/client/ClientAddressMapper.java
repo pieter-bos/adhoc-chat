@@ -79,4 +79,13 @@ public class ClientAddressMapper {
     public Collection<String> values() {
         return addressUsernameMap.values();
     }
+
+    /**
+     * Check if ip address is in use
+     * @param client
+     * @return
+     */
+    public boolean contains(InetAddress client) {
+        return addressUsernameMap.containsKey(client);
+    }
 }
