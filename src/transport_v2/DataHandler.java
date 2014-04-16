@@ -69,8 +69,9 @@ public class DataHandler implements PacketListener {
                 }
                 lastInOrderSequenceNumber.put(packet.getSourceIp(), cur.getSequenceNumber());
                 it.remove();
-            } else if (cur.getSequenceNumber() <= lastInOrderSequenceNumber.get(packet.getSourceIp())) {
+            } else if (Util.differenceWithWrapAround(cur.getSequenceNumber(), lastInOrderSequenceNumber.get(packet.getSourceIp())) <= 0) {
                 System.out.println("Dit hoort niet");
+                it.remove();
             } else {
                 break;
             }
