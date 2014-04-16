@@ -6,6 +6,8 @@ import java.util.*;
 import java.util.concurrent.LinkedBlockingQueue;
 
 public class SocketImpl extends Socket {
+    public static final int MAX_DATA_SIZE = (1 << 16) - RawPacket.MIN_SIZE;
+
     private static final long ANNOUNCE_INTERVAL = 30 * 1000;
     private static final int MAX_ANNOUNCE_DROP_COUNT = 3;
     private static final long RETRANSMIT_INTERVAL = 1 * 1000;
@@ -151,6 +153,10 @@ public class SocketImpl extends Socket {
 
     @Override
     public void send(byte[] data, InetAddress destination) throws IOException {
+        if (data.length > MAX_DATA_SIZE) {
+            throw new IOException("To much data to send");
+        }
+
         synchronized (network) {
             if (!network.contains(destination)) {
                 throw new IOException("Destination not in current network");
@@ -163,6 +169,10 @@ public class SocketImpl extends Socket {
     @Override
     @SuppressWarnings("unchecked")
     public void broadcast(byte[] data) throws IOException {
+        if (data.length > MAX_DATA_SIZE) {
+            throw new IOException("To much data to send");
+        }
+
         Iterable<InetAddress> networkClone;
 
         synchronized(network) {
