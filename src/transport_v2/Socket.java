@@ -2,14 +2,19 @@ package transport_v2;
 
 import java.io.IOException;
 import java.net.InetAddress;
+import java.util.Observable;
 
-public interface Socket {
-    // public Socket(int port);
+public abstract class Socket extends Observable {
+    protected final int port;
 
-    public void connect() throws IOException;
-    public boolean isConnected();
-    public void send(byte[] data, InetAddress destination) throws IOException;
-    public void broadcast(byte[] data) throws IOException;
-    public Packet receive() throws InterruptedException;
-    public Iterable<InetAddress> getOtherClients();
+    public Socket(int port) throws IOException {
+        this.port = port;
+    }
+
+    public abstract void connect() throws IOException;
+    public abstract boolean isConnected();
+    public abstract void send(byte[] data, InetAddress destination) throws IOException;
+    public abstract void broadcast(byte[] data) throws IOException;
+    public abstract Packet receive() throws InterruptedException;
+    public abstract Iterable<InetAddress> getOtherClients();
 }

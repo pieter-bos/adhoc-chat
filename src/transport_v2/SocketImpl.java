@@ -5,7 +5,7 @@ import java.net.*;
 import java.util.*;
 import java.util.concurrent.LinkedBlockingQueue;
 
-public class SocketImpl implements Socket {
+public class SocketImpl extends Socket {
     private static final long ANNOUNCE_INTERVAL = 30 * 1000;
     private static final int MAX_ANNOUNCE_DROP_COUNT = 3;
     private static final long RETRANSMIT_INTERVAL = 1 * 1000;
@@ -14,7 +14,6 @@ public class SocketImpl implements Socket {
 
     private final InetAddress ip;
     private final MulticastSocket transport;
-    private final int port;
     private final InetAddress group;
     private boolean connected = false;
     private final LinkedBlockingQueue<Packet> receiveQueue = new LinkedBlockingQueue<>();
@@ -27,7 +26,7 @@ public class SocketImpl implements Socket {
     private final HashSet<InetAddress> network = new HashSet<>();
 
     public SocketImpl(int port) throws IOException {
-        this.port = port;
+        super(port);
         this.group = InetAddress.getByName(GROUP);
 
         InetAddress ip = null;
@@ -145,6 +144,9 @@ public class SocketImpl implements Socket {
         synchronized(network) {
             network.remove(ip);
         }
+
+        setChanged();
+        notifyObservers();
     }
 
     @Override
@@ -207,5 +209,8 @@ public class SocketImpl implements Socket {
         synchronized (network) {
             network.add(ip);
         }
+
+        setChanged();
+        notifyObservers();
     }
 }
