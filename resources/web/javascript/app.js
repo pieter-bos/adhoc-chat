@@ -302,12 +302,16 @@ var chat = angular.module('chat', [])
     $scope.$on('settingService::nicknameChanged', function() {
         $('#nick-modal').modal('hide');
         $scope.nickname = nickname;
-        $scope.$apply();
+        if (!$scope.$$phase) {
+            $scope.$apply();
+        }
     });
 
     $scope.$on('websocketService::connected', function() {
         $scope.connected = true;
-        $scope.$apply();
+        if (!$scope.$$phase) {
+            $scope.$apply();
+        }
     });
 })
 // Controller for user related views
@@ -320,7 +324,9 @@ var chat = angular.module('chat', [])
 
     $scope.$on('userModel::usersChanged', function() {
         $scope.users = userModel.users;
-        $scope.$apply();
+        if (!$scope.$$phase) {
+            $scope.$apply();
+        }
     });
 })
 // Controller for conversation related views
@@ -348,7 +354,9 @@ var chat = angular.module('chat', [])
 
     $scope.$on('conversationModel::conversationsChanged', function() {
         $scope.conversations = conversationModel.conversations;
-        $scope.$apply();
+        if (!$scope.$$phase) {
+            $scope.$apply();
+        }
     });
 
     $scope.addEmoticon = function(e) {
