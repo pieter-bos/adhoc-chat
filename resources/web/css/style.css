@@ -26,12 +26,6 @@ a {
     }
 }
 
-#hamster {
-    animation-name: rotate;
-    animation-duration: 1s;
-    animation-iteration-count: infinite;
-}
-
 .dropdown-menu{
     max-width: 600px;
 }
@@ -52,7 +46,7 @@ a {
 }
 
 body {
-    background-image: url("../chat-emoticons/chat-background.gif");
+    background-image: url("../chat-emoticons/hamster.jpg");
     background-repeat: no-repeat;
     background-position: bottom right;
 }
