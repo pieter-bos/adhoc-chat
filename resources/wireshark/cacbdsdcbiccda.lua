@@ -1,8 +1,8 @@
-caa = Proto("CAA", "CAA Protocol")
+caa = Proto("CAA2", "CAA 2 Protocol")
 
 function caa.dissector(buffer, pinfo, tree)
-    pinfo.cols.protocol = "CAA"
-    pinfo.cols.info = "CAA " 
+    pinfo.cols.protocol = "CAA2"
+    pinfo.cols.info = "CAA2 " 
         .. (buffer(0, 1):bitfield(7, 1) == 1 and "SYN" or "")
         .. (buffer(0, 1):bitfield(6, 1) == 1 and "ACK" or "")
 
