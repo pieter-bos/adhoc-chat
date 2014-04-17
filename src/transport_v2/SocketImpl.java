@@ -154,7 +154,7 @@ public class SocketImpl extends Socket {
     @Override
     public void send(byte[] data, InetAddress destination) throws IOException {
         if (data.length > MAX_DATA_SIZE) {
-            throw new IOException("To much data to send");
+            throw new IOException("Too much data to send");
         }
 
         synchronized (network) {
@@ -170,7 +170,7 @@ public class SocketImpl extends Socket {
     @SuppressWarnings("unchecked")
     public void broadcast(byte[] data) throws IOException {
         if (data.length > MAX_DATA_SIZE) {
-            throw new IOException("To much data to send");
+            throw new IOException("Too much data to send");
         }
 
         Iterable<InetAddress> networkClone;
