@@ -5,7 +5,7 @@ import java.net.InetAddress;
 
 public class RTTTest {
     public static final boolean isFrans = false;
-    public static final String FRANS = "192.168.5.36";
+    public static final String FRANS = "192.168.5.13";
     public static final String PIETER = "192.168.5.123";
     private static final int DATA_LENGTH = 64;
 
@@ -15,6 +15,7 @@ public class RTTTest {
 
     public RTTTest() throws InterruptedException, IOException {
         socket = new SocketImpl(1234);
+        socket.connect();
         frans = InetAddress.getByName(FRANS);
         pieter = InetAddress.getByName(PIETER);
 
@@ -32,7 +33,7 @@ public class RTTTest {
             }
 
             long newTick = System.nanoTime();
-            System.out.println(newTick - lastTick);
+            System.out.println((double) (newTick - lastTick) / 1000000.0);
             lastTick = newTick;
         }
     }
